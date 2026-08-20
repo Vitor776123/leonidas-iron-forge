@@ -220,11 +220,11 @@ function Questionario() {
       titulo: "Ênfase do treino",
       valido:
         !!form.foco &&
-        (form.foco !== "Foco customizado" || !!form.foco_grupo_customizado),
+        (form.foco !== "foco_customizado" || !!form.foco_grupo_customizado),
       render: () => (
         <div className="space-y-4">
           <Options options={FOCOS} value={form.foco} onChange={(v) => set("foco", v)} />
-          {form.foco === "Foco customizado" && (
+          {form.foco === "foco_customizado" && (
             <div className="rise-in">
               <p className="mb-2 text-sm uppercase tracking-widest text-gold">
                 Grupo muscular
