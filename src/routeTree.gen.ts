@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as QuestionarioRouteImport } from './routes/questionario'
+import { Route as TreinoRouteImport } from './routes/treino'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +35,25 @@ const QuestionarioRoute = QuestionarioRouteImport.update({
   path: '/questionario',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TreinoRoute = TreinoRouteImport.update({
+  id: '/treino',
+  path: '/treino',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/perfil': typeof PerfilRoute
   '/questionario': typeof QuestionarioRoute
+  '/treino': typeof TreinoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/perfil': typeof PerfilRoute
   '/questionario': typeof QuestionarioRoute
+  '/treino': typeof TreinoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/perfil': typeof PerfilRoute
   '/questionario': typeof QuestionarioRoute
+  '/treino': typeof TreinoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/perfil' | '/questionario'
+  fullPaths: '/' | '/auth' | '/perfil' | '/questionario' | '/treino'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/perfil' | '/questionario'
-  id: '__root__' | '/' | '/auth' | '/perfil' | '/questionario'
+  to: '/' | '/auth' | '/perfil' | '/questionario' | '/treino'
+  id: '__root__' | '/' | '/auth' | '/perfil' | '/questionario' | '/treino'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   PerfilRoute: typeof PerfilRoute
   QuestionarioRoute: typeof QuestionarioRoute
+  TreinoRoute: typeof TreinoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuestionarioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/treino': {
+      id: '/treino'
+      path: '/treino'
+      fullPath: '/treino'
+      preLoaderRoute: typeof TreinoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   PerfilRoute: PerfilRoute,
   QuestionarioRoute: QuestionarioRoute,
+  TreinoRoute: TreinoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
