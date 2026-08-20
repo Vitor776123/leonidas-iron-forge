@@ -253,6 +253,9 @@ function Questionario() {
           form.foco === "Foco customizado" ? form.foco_grupo_customizado : null,
       };
 
+      const profilePayload: Record<string, string | number | null> = { ...payload };
+      delete profilePayload.imc;
+
       const { data: existente } = await supabase
         .from("profiles")
         .select("id")
@@ -262,12 +265,16 @@ function Questionario() {
       let profileId = existente?.id as string | undefined;
 
       if (profileId) {
-        const { error } = await supabase.from("profiles").update(payload).eq("id", profileId);
+        const { error } = await supabase
+          .from("profiles")
+          .update(profilePayload)
+          .eq("id", profileId);
         if (error) throw error;
       } else {
+        console.log("[Leonidas] profiles insert payload:", profilePayload);
         const { data, error } = await supabase
           .from("profiles")
-          .insert(payload)
+          .insert(profilePayload)
           .select("id")
           .single();
         if (error) throw error;
