@@ -26,26 +26,31 @@ export const Route = createFileRoute("/questionario")({
   component: Questionario,
 });
 
-const CATEGORIAS = [
-  "Iniciante",
-  "Intermediário",
-  "Intermediário Avançado",
-  "Veterano",
-  "Veterano Casca Grossa",
+type Opt = { label: string; value: string };
+
+const GENEROS: Opt[] = [
+  { label: "Masculino", value: "masculino" },
+  { label: "Feminino", value: "feminino" },
+  { label: "Outro", value: "outro" },
 ];
-const CATEGORIA_DB: Record<string, string> = {
-  Iniciante: "iniciante",
-  Intermediário: "intermediario",
-  "Intermediário Avançado": "intermediario_avancado",
-  Veterano: "veterano",
-  "Veterano Casca Grossa": "veterano_casca_grossa",
-};
-const OBJETIVOS = ["Hipertrofia", "Emagrecimento", "Condicionamento", "Força"];
-const FOCOS = [
-  "Glúteo e posterior",
-  "Ombros e braços",
-  "Equilibrado",
-  "Foco customizado",
+const CATEGORIAS: Opt[] = [
+  { label: "Iniciante", value: "iniciante" },
+  { label: "Intermediário", value: "intermediario" },
+  { label: "Intermediário Avançado", value: "intermediario_avancado" },
+  { label: "Veterano", value: "veterano" },
+  { label: "Veterano Casca Grossa", value: "veterano_casca_grossa" },
+];
+const OBJETIVOS: Opt[] = [
+  { label: "Hipertrofia", value: "hipertrofia" },
+  { label: "Emagrecimento", value: "emagrecimento" },
+  { label: "Condicionamento", value: "condicionamento" },
+  { label: "Força", value: "forca" },
+];
+const FOCOS: Opt[] = [
+  { label: "Glúteo e posterior", value: "gluteo_posterior" },
+  { label: "Ombros e braços", value: "ombros_bracos" },
+  { label: "Equilibrado", value: "equilibrado" },
+  { label: "Foco customizado", value: "foco_customizado" },
 ];
 const GRUPOS = [
   "Peito",
@@ -157,7 +162,7 @@ function Questionario() {
       valido: !!form.genero,
       render: () => (
         <Options
-          options={["masculino", "feminino", "outro"]}
+          options={GENEROS}
           value={form.genero}
           onChange={(v) => set("genero", v)}
         />
@@ -215,11 +220,11 @@ function Questionario() {
       titulo: "Ênfase do treino",
       valido:
         !!form.foco &&
-        (form.foco !== "Foco customizado" || !!form.foco_grupo_customizado),
+        (form.foco !== "foco_customizado" || !!form.foco_grupo_customizado),
       render: () => (
         <div className="space-y-4">
           <Options options={FOCOS} value={form.foco} onChange={(v) => set("foco", v)} />
-          {form.foco === "Foco customizado" && (
+          {form.foco === "foco_customizado" && (
             <div className="rise-in">
               <p className="mb-2 text-sm uppercase tracking-widest text-gold">
                 Grupo muscular
@@ -254,10 +259,10 @@ function Questionario() {
         dias_por_semana: +form.dias_por_semana,
         tempo_treino_meses: +form.tempo_treino_meses,
         objetivo: form.objetivo,
-        categoria: CATEGORIA_DB[form.categoria] ?? form.categoria,
+        categoria: form.categoria,
         foco: form.foco,
         foco_grupo_customizado:
-          form.foco === "Foco customizado" ? form.foco_grupo_customizado : null,
+          form.foco === "foco_customizado" ? form.foco_grupo_customizado : null,
       };
 
       const profilePayload: typeof payload & { imc?: number | null } = { ...payload };
@@ -390,27 +395,30 @@ function Options({
   onChange,
   columns,
 }: {
-  options: string[];
+  options: Array<string | Opt>;
   value: string;
   onChange: (v: string) => void;
   columns?: boolean;
 }) {
+  const items: Opt[] = options.map((o) =>
+    typeof o === "string" ? { label: o, value: o } : o,
+  );
   return (
     <div className={columns ? "grid grid-cols-2 gap-3 sm:grid-cols-3" : "space-y-3"}>
-      {options.map((o) => {
-        const active = value === o;
+      {items.map((o) => {
+        const active = value === o.value;
         return (
           <button
-            key={o}
+            key={o.value}
             type="button"
-            onClick={() => onChange(o)}
+            onClick={() => onChange(o.value)}
             className={`w-full rounded-sm border-2 px-4 py-4 text-left font-display text-lg uppercase tracking-wide transition-all ${
               active
                 ? "border-primary bg-primary/15 text-foreground shadow-[var(--shadow-blood)]"
                 : "border-border bg-card text-muted-foreground hover:border-gold/60 hover:text-foreground"
             }`}
           >
-            {o}
+            {o.label}
           </button>
         );
       })}

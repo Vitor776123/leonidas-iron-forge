@@ -59,14 +59,14 @@ function PerfilPage() {
           <Info label="Altura" value={`${profile.altura_cm} cm`} />
           <Info label="Peso" value={`${profile.peso_kg} kg`} />
           <Info label="IMC" value={profile.imc ? String(profile.imc) : "—"} />
-          <Info label="Gênero" value={profile.genero} />
+          <Info label="Gênero" value={rotulo(profile.genero)} />
           <Info label="Dias / semana" value={String(profile.dias_por_semana)} />
           <Info label="Tempo de treino" value={`${profile.tempo_treino_meses} meses`} />
-          <Info label="Categoria" value={profile.categoria} gold />
-          <Info label="Objetivo" value={profile.objetivo} />
+          <Info label="Categoria" value={rotulo(profile.categoria)} gold />
+          <Info label="Objetivo" value={rotulo(profile.objetivo)} />
           <Info
             label="Foco"
-            value={profile.foco_grupo_customizado || profile.foco}
+            value={profile.foco_grupo_customizado || rotulo(profile.foco)}
             gold
           />
         </div>
@@ -101,4 +101,28 @@ function Info({ label, value, gold }: { label: string; value: string; gold?: boo
       </p>
     </div>
   );
+}
+
+const ROTULOS: Record<string, string> = {
+  masculino: "Masculino",
+  feminino: "Feminino",
+  outro: "Outro",
+  hipertrofia: "Hipertrofia",
+  emagrecimento: "Emagrecimento",
+  condicionamento: "Condicionamento",
+  forca: "Força",
+  iniciante: "Iniciante",
+  intermediario: "Intermediário",
+  intermediario_avancado: "Intermediário Avançado",
+  veterano: "Veterano",
+  veterano_casca_grossa: "Veterano Casca Grossa",
+  gluteo_posterior: "Glúteo e posterior",
+  ombros_bracos: "Ombros e braços",
+  equilibrado: "Equilibrado",
+  foco_customizado: "Foco customizado",
+};
+
+function rotulo(v: string | null | undefined) {
+  if (!v) return "—";
+  return ROTULOS[v] ?? v;
 }
