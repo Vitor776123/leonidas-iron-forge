@@ -395,27 +395,30 @@ function Options({
   onChange,
   columns,
 }: {
-  options: string[];
+  options: Array<string | Opt>;
   value: string;
   onChange: (v: string) => void;
   columns?: boolean;
 }) {
+  const items: Opt[] = options.map((o) =>
+    typeof o === "string" ? { label: o, value: o } : o,
+  );
   return (
     <div className={columns ? "grid grid-cols-2 gap-3 sm:grid-cols-3" : "space-y-3"}>
-      {options.map((o) => {
-        const active = value === o;
+      {items.map((o) => {
+        const active = value === o.value;
         return (
           <button
-            key={o}
+            key={o.value}
             type="button"
-            onClick={() => onChange(o)}
+            onClick={() => onChange(o.value)}
             className={`w-full rounded-sm border-2 px-4 py-4 text-left font-display text-lg uppercase tracking-wide transition-all ${
               active
                 ? "border-primary bg-primary/15 text-foreground shadow-[var(--shadow-blood)]"
                 : "border-border bg-card text-muted-foreground hover:border-gold/60 hover:text-foreground"
             }`}
           >
-            {o}
+            {o.label}
           </button>
         );
       })}
