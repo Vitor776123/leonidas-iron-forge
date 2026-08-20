@@ -253,8 +253,8 @@ function Questionario() {
           form.foco === "Foco customizado" ? form.foco_grupo_customizado : null,
       };
 
-      const profilePayload: Record<string, string | number | null> = { ...payload };
-      delete profilePayload.imc;
+      const profilePayload: typeof payload & { imc?: number | null } = { ...payload };
+      delete profilePayload["imc"];
 
       const { data: existente } = await supabase
         .from("profiles")
