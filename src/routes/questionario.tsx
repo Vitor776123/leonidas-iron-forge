@@ -237,14 +237,12 @@ function Questionario() {
     if (!user) return;
     setSaving(true);
     try {
-      const altura = +form.altura_cm;
-      const peso = +form.peso_kg;
       const payload = {
         user_id: user.id,
         nome: form.nome.trim(),
         idade: +form.idade,
-        altura_cm: altura,
-        peso_kg: peso,
+        altura_cm: +form.altura_cm,
+        peso_kg: +form.peso_kg,
         genero: form.genero,
         dias_por_semana: +form.dias_por_semana,
         tempo_treino_meses: +form.tempo_treino_meses,
@@ -253,7 +251,6 @@ function Questionario() {
         foco: form.foco,
         foco_grupo_customizado:
           form.foco === "Foco customizado" ? form.foco_grupo_customizado : null,
-        imc: +(peso / Math.pow(altura / 100, 2)).toFixed(2),
       };
 
       const { data: existente } = await supabase
