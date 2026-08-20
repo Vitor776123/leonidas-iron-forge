@@ -102,3 +102,27 @@ function Info({ label, value, gold }: { label: string; value: string; gold?: boo
     </div>
   );
 }
+
+const ROTULOS: Record<string, string> = {
+  masculino: "Masculino",
+  feminino: "Feminino",
+  outro: "Outro",
+  hipertrofia: "Hipertrofia",
+  emagrecimento: "Emagrecimento",
+  condicionamento: "Condicionamento",
+  forca: "Força",
+  iniciante: "Iniciante",
+  intermediario: "Intermediário",
+  intermediario_avancado: "Intermediário Avançado",
+  veterano: "Veterano",
+  veterano_casca_grossa: "Veterano Casca Grossa",
+  gluteo_posterior: "Glúteo e posterior",
+  ombros_bracos: "Ombros e braços",
+  equilibrado: "Equilibrado",
+  foco_customizado: "Foco customizado",
+};
+
+function rotulo(v: string | null | undefined) {
+  if (!v) return "—";
+  return ROTULOS[v] ?? v;
+}
