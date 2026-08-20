@@ -59,14 +59,14 @@ function PerfilPage() {
           <Info label="Altura" value={`${profile.altura_cm} cm`} />
           <Info label="Peso" value={`${profile.peso_kg} kg`} />
           <Info label="IMC" value={profile.imc ? String(profile.imc) : "—"} />
-          <Info label="Gênero" value={profile.genero} />
+          <Info label="Gênero" value={rotulo(profile.genero)} />
           <Info label="Dias / semana" value={String(profile.dias_por_semana)} />
           <Info label="Tempo de treino" value={`${profile.tempo_treino_meses} meses`} />
-          <Info label="Categoria" value={profile.categoria} gold />
-          <Info label="Objetivo" value={profile.objetivo} />
+          <Info label="Categoria" value={rotulo(profile.categoria)} gold />
+          <Info label="Objetivo" value={rotulo(profile.objetivo)} />
           <Info
             label="Foco"
-            value={profile.foco_grupo_customizado || profile.foco}
+            value={profile.foco_grupo_customizado || rotulo(profile.foco)}
             gold
           />
         </div>
