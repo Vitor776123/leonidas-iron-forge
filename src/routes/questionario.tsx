@@ -162,7 +162,7 @@ function Questionario() {
       valido: !!form.genero,
       render: () => (
         <Options
-          options={["masculino", "feminino", "outro"]}
+          options={GENEROS}
           value={form.genero}
           onChange={(v) => set("genero", v)}
         />
