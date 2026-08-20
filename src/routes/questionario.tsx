@@ -230,7 +230,7 @@ function Questionario() {
     },
   ];
 
-  const atual = steps[step];
+  const atual = steps[step]!;
   const progresso = ((step + 1) / steps.length) * 100;
 
   async function finalizar() {
