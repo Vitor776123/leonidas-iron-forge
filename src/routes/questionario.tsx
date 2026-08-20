@@ -33,6 +33,13 @@ const CATEGORIAS = [
   "Veterano",
   "Veterano Casca Grossa",
 ];
+const CATEGORIA_DB: Record<string, string> = {
+  Iniciante: "iniciante",
+  Intermediário: "intermediario",
+  "Intermediário Avançado": "intermediario_avancado",
+  Veterano: "veterano",
+  "Veterano Casca Grossa": "veterano_casca_grossa",
+};
 const OBJETIVOS = ["Hipertrofia", "Emagrecimento", "Condicionamento", "Força"];
 const FOCOS = [
   "Glúteo e posterior",
@@ -247,11 +254,14 @@ function Questionario() {
         dias_por_semana: +form.dias_por_semana,
         tempo_treino_meses: +form.tempo_treino_meses,
         objetivo: form.objetivo,
-        categoria: form.categoria,
+        categoria: CATEGORIA_DB[form.categoria] ?? form.categoria,
         foco: form.foco,
         foco_grupo_customizado:
           form.foco === "Foco customizado" ? form.foco_grupo_customizado : null,
       };
+
+      const profilePayload: typeof payload & { imc?: number | null } = { ...payload };
+      delete profilePayload["imc"];
 
       const { data: existente } = await supabase
         .from("profiles")
@@ -262,12 +272,16 @@ function Questionario() {
       let profileId = existente?.id as string | undefined;
 
       if (profileId) {
-        const { error } = await supabase.from("profiles").update(payload).eq("id", profileId);
+        const { error } = await supabase
+          .from("profiles")
+          .update(profilePayload)
+          .eq("id", profileId);
         if (error) throw error;
       } else {
+        console.log("[Leonidas] profiles insert payload:", profilePayload);
         const { data, error } = await supabase
           .from("profiles")
-          .insert(payload)
+          .insert(profilePayload)
           .select("id")
           .single();
         if (error) throw error;
