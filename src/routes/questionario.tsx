@@ -259,10 +259,10 @@ function Questionario() {
         dias_por_semana: +form.dias_por_semana,
         tempo_treino_meses: +form.tempo_treino_meses,
         objetivo: form.objetivo,
-        categoria: CATEGORIA_DB[form.categoria] ?? form.categoria,
+        categoria: form.categoria,
         foco: form.foco,
         foco_grupo_customizado:
-          form.foco === "Foco customizado" ? form.foco_grupo_customizado : null,
+          form.foco === "foco_customizado" ? form.foco_grupo_customizado : null,
       };
 
       const profilePayload: typeof payload & { imc?: number | null } = { ...payload };
