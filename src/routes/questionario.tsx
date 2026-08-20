@@ -26,26 +26,31 @@ export const Route = createFileRoute("/questionario")({
   component: Questionario,
 });
 
-const CATEGORIAS = [
-  "Iniciante",
-  "Intermediário",
-  "Intermediário Avançado",
-  "Veterano",
-  "Veterano Casca Grossa",
+type Opt = { label: string; value: string };
+
+const GENEROS: Opt[] = [
+  { label: "Masculino", value: "masculino" },
+  { label: "Feminino", value: "feminino" },
+  { label: "Outro", value: "outro" },
 ];
-const CATEGORIA_DB: Record<string, string> = {
-  Iniciante: "iniciante",
-  Intermediário: "intermediario",
-  "Intermediário Avançado": "intermediario_avancado",
-  Veterano: "veterano",
-  "Veterano Casca Grossa": "veterano_casca_grossa",
-};
-const OBJETIVOS = ["Hipertrofia", "Emagrecimento", "Condicionamento", "Força"];
-const FOCOS = [
-  "Glúteo e posterior",
-  "Ombros e braços",
-  "Equilibrado",
-  "Foco customizado",
+const CATEGORIAS: Opt[] = [
+  { label: "Iniciante", value: "iniciante" },
+  { label: "Intermediário", value: "intermediario" },
+  { label: "Intermediário Avançado", value: "intermediario_avancado" },
+  { label: "Veterano", value: "veterano" },
+  { label: "Veterano Casca Grossa", value: "veterano_casca_grossa" },
+];
+const OBJETIVOS: Opt[] = [
+  { label: "Hipertrofia", value: "hipertrofia" },
+  { label: "Emagrecimento", value: "emagrecimento" },
+  { label: "Condicionamento", value: "condicionamento" },
+  { label: "Força", value: "forca" },
+];
+const FOCOS: Opt[] = [
+  { label: "Glúteo e posterior", value: "gluteo_posterior" },
+  { label: "Ombros e braços", value: "ombros_bracos" },
+  { label: "Equilibrado", value: "equilibrado" },
+  { label: "Foco customizado", value: "foco_customizado" },
 ];
 const GRUPOS = [
   "Peito",
