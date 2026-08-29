@@ -45,6 +45,8 @@ function TreinoPage() {
   const [diaAtivo, setDiaAtivo] = useState<string | null>(null);
   const [detalhe, setDetalhe] = useState<WorkoutExercise | null>(null);
   const [trocando, setTrocando] = useState<WorkoutExercise | null>(null);
+  const [finalizando, setFinalizando] = useState(false);
+  const [criando, setCriando] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
