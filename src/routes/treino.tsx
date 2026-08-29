@@ -380,6 +380,30 @@ function TreinoPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog open={!!excluindoEx} onOpenChange={(o) => !o && setExcluindoEx(null)}>
+        <AlertDialogContent className="border-border bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-2xl uppercase">
+              Remover exercício?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Remover "{excluindoEx?.exercises?.name_pt}" do treino?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-12 font-display tracking-widest">
+              CANCELAR
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="h-12 bg-primary font-display tracking-widest"
+              onClick={() => excluindoEx && excluirExercicio(excluindoEx)}
+            >
+              REMOVER
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <CriarDiaDialog
         open={criando}
         planId={data?.planId ?? null}
