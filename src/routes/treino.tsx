@@ -438,6 +438,13 @@ function TrocaDialog({
 
 const PADRAO = { series: 3, reps_min: 8, reps_max: 12, descanso_segundos: 75 };
 
+const EQUIPAMENTOS: { key: string; label: string; values: string[] }[] = [
+  { key: "maquinas", label: "Máquinas", values: ["machine", "lever"] },
+  { key: "corpo", label: "Peso do corpo", values: ["bodyweight"] },
+  { key: "halteres", label: "Halteres", values: ["dumbbell"] },
+  { key: "elastico", label: "Elástico", values: ["band"] },
+];
+
 const MUSCULOS = [
   "abductors","abs","adductors","biceps","calves","delts","forearms","glutes",
   "hamstrings","lats","pectorals","quads","traps","triceps","upper back",
