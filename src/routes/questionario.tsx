@@ -110,7 +110,17 @@ function Questionario() {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
   }, [user, loading, navigate]);
 
-  const set = (k: keyof Form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const set = (k: "nome" | "idade" | "altura_cm" | "peso_kg" | "genero" | "dias_por_semana" | "tempo_treino_meses" | "categoria" | "foco", v: string) =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  const toggle = (k: "objetivos" | "grupos_customizados", v: string, max?: number) =>
+    setForm((f) => {
+      const cur = f[k];
+      if (cur.includes(v)) return { ...f, [k]: cur.filter((x) => x !== v) };
+      if (max && cur.length >= max) return f;
+      return { ...f, [k]: [...cur, v] };
+    });
+
 
   const steps: {
     titulo: string;
