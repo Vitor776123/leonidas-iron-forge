@@ -6,9 +6,11 @@ import { supabase } from "@/integrations/supabase/client";
 export function AppShell({
   children,
   bottomBar,
+  headerLeft,
 }: {
   children: ReactNode;
   bottomBar?: ReactNode;
+  headerLeft?: ReactNode;
 }) {
   const navigate = useNavigate();
 
@@ -20,7 +22,8 @@ export function AppShell({
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur">
-        <div className="mx-auto grid max-w-2xl grid-cols-[minmax(0,1fr)_auto] items-center gap-2 px-4 py-2">
+        <div className="mx-auto grid max-w-2xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 px-4 py-2">
+          {headerLeft ?? <span />}
           <Link to="/treino" className="flex min-w-0 items-center gap-2">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-sm bg-primary">
               <Dumbbell className="size-5 text-primary-foreground" strokeWidth={2.75} />
