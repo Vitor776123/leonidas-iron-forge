@@ -460,6 +460,7 @@ function CriarDiaDialog({
   const [dayId, setDayId] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [musculo, setMusculo] = useState<string | null>(null);
+  const [equipos, setEquipos] = useState<string[]>([]);
   const [adicionados, setAdicionados] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -469,12 +470,13 @@ function CriarDiaDialog({
       setDayId(null);
       setBusca("");
       setMusculo(null);
+      setEquipos([]);
       setAdicionados([]);
     }
   }, [open]);
 
   const { data: lista, isLoading } = useQuery({
-    queryKey: ["ex-busca", busca, musculo],
+    queryKey: ["ex-busca", busca, musculo, equipos.join(",")],
     enabled: open && !!dayId,
     queryFn: async () => {
       let q = supabase
@@ -484,6 +486,10 @@ function CriarDiaDialog({
         .limit(50);
       if (busca.trim()) q = q.ilike("name_pt", `%${busca.trim()}%`);
       if (musculo) q = q.eq("muscle", musculo);
+      if (equipos.length) {
+        const vals = equipos.flatMap((k) => EQUIPAMENTOS.find((e) => e.key === k)?.values ?? []);
+        if (vals.length) q = q.in("equipment", vals);
+      }
       const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as Exercise[];
