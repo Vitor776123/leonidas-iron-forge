@@ -452,3 +452,56 @@ function Options({
     </div>
   );
 }
+
+function PriorityOptions({
+  options,
+  values,
+  onToggle,
+  columns,
+  max,
+}: {
+  options: Opt[];
+  values: string[];
+  onToggle: (v: string) => void;
+  columns?: boolean;
+  max?: number;
+}) {
+  return (
+    <div className={columns ? "grid grid-cols-2 gap-3" : "space-y-3"}>
+      {options.map((o) => {
+        const idx = values.indexOf(o.value);
+        const on = idx >= 0;
+        const bloqueado = !on && !!max && values.length >= max;
+        const estilo = !on
+          ? "border-border bg-card text-muted-foreground hover:border-gold/60 hover:text-foreground"
+          : idx === 0
+            ? "border-primary bg-primary/20 text-foreground shadow-[var(--shadow-blood)]"
+            : idx === 1
+              ? "border-gold bg-gold/15 text-foreground"
+              : "border-gold/50 bg-gold/5 text-foreground";
+        return (
+          <button
+            key={o.value}
+            type="button"
+            disabled={bloqueado}
+            onClick={() => onToggle(o.value)}
+            className={`flex min-h-[56px] w-full items-center justify-between gap-3 rounded-sm border-2 px-4 py-3 text-left font-display text-lg uppercase tracking-wide transition-all disabled:opacity-40 ${estilo}`}
+          >
+            <span className="min-w-0">{o.label}</span>
+            {on && (
+              <span
+                className={`flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                  idx === 0
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-gold text-background"
+                }`}
+              >
+                {idx + 1}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
