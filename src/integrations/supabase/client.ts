@@ -52,6 +52,8 @@ export type WorkoutExercise = {
   descanso_segundos: number;
   eh_bonus_foco: boolean;
   tecnica_avancada: string | null;
+  concluido: boolean | null;
+  observacao: string | null;
   exercises: Exercise | null;
 };
 

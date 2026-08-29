@@ -122,7 +122,7 @@ function TreinoPage() {
       const { data: dias, error } = await supabase
         .from("workout_days")
         .select(
-          "id, ordem, rotulo, workout_exercises(id, workout_day_id, exercise_id, ordem, series, reps_min, reps_max, descanso_segundos, eh_bonus_foco, tecnica_avancada, exercises(id, name_pt, muscle, body_part, equipment, gif_url, instructions_pt, dificuldade))",
+          "id, ordem, rotulo, workout_exercises(id, workout_day_id, exercise_id, ordem, series, reps_min, reps_max, descanso_segundos, eh_bonus_foco, tecnica_avancada, concluido, observacao, exercises(id, name_pt, muscle, body_part, equipment, gif_url, instructions_pt, dificuldade))",
         )
         .eq("workout_plan_id", plan.id)
         .order("ordem");
