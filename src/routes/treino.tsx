@@ -571,6 +571,35 @@ function CriarDiaDialog({
           </div>
         ) : (
           <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              {EQUIPAMENTOS.map((eq) => {
+                const on = equipos.includes(eq.key);
+                return (
+                  <label
+                    key={eq.key}
+                    className={`flex min-h-[44px] cursor-pointer items-center gap-2 rounded-sm border-2 px-3 py-2 text-sm uppercase tracking-wide transition-colors ${
+                      on
+                        ? "border-primary bg-primary/15 text-foreground"
+                        : "border-border bg-secondary/50 text-muted-foreground"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={on}
+                      onChange={() =>
+                        setEquipos((cur) =>
+                          cur.includes(eq.key)
+                            ? cur.filter((k) => k !== eq.key)
+                            : [...cur, eq.key],
+                        )
+                      }
+                      className="size-4 accent-[hsl(var(--primary))]"
+                    />
+                    {eq.label}
+                  </label>
+                );
+              })}
+            </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
               <Input
