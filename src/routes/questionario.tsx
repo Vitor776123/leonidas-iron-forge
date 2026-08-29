@@ -52,17 +52,22 @@ const FOCOS: Opt[] = [
   { label: "Equilibrado", value: "equilibrado" },
   { label: "Foco customizado", value: "foco_customizado" },
 ];
-const GRUPOS = [
-  "Peito",
-  "Costas",
-  "Ombros",
-  "Bíceps",
-  "Tríceps",
-  "Quadríceps",
-  "Posterior de coxa",
-  "Glúteo",
-  "Panturrilha",
-  "Abdômen",
+const GRUPOS: Opt[] = [
+  { label: "Abdutores", value: "abductors" },
+  { label: "Abdômen", value: "abs" },
+  { label: "Adutores", value: "adductors" },
+  { label: "Bíceps", value: "biceps" },
+  { label: "Panturrilhas", value: "calves" },
+  { label: "Deltoides", value: "delts" },
+  { label: "Antebraços", value: "forearms" },
+  { label: "Glúteos", value: "glutes" },
+  { label: "Posterior de coxa", value: "hamstrings" },
+  { label: "Dorsais", value: "lats" },
+  { label: "Peitorais", value: "pectorals" },
+  { label: "Quadríceps", value: "quads" },
+  { label: "Trapézio", value: "traps" },
+  { label: "Tríceps", value: "triceps" },
+  { label: "Parte superior das costas", value: "upper back" },
 ];
 
 type Form = {
@@ -74,9 +79,9 @@ type Form = {
   dias_por_semana: string;
   tempo_treino_meses: string;
   categoria: string;
-  objetivo: string;
+  objetivos: string[];
   foco: string;
-  foco_grupo_customizado: string;
+  grupos_customizados: string[];
 };
 
 const EMPTY: Form = {
@@ -88,10 +93,11 @@ const EMPTY: Form = {
   dias_por_semana: "",
   tempo_treino_meses: "",
   categoria: "",
-  objetivo: "",
+  objetivos: [],
   foco: "",
-  foco_grupo_customizado: "",
+  grupos_customizados: [],
 };
+
 
 function Questionario() {
   const { user, loading } = useAuth();
@@ -104,7 +110,17 @@ function Questionario() {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
   }, [user, loading, navigate]);
 
-  const set = (k: keyof Form, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const set = (k: "nome" | "idade" | "altura_cm" | "peso_kg" | "genero" | "dias_por_semana" | "tempo_treino_meses" | "categoria" | "foco", v: string) =>
+    setForm((f) => ({ ...f, [k]: v }));
+
+  const toggle = (k: "objetivos" | "grupos_customizados", v: string, max?: number) =>
+    setForm((f) => {
+      const cur = f[k];
+      if (cur.includes(v)) return { ...f, [k]: cur.filter((x) => x !== v) };
+      if (max && cur.length >= max) return f;
+      return { ...f, [k]: [...cur, v] };
+    });
+
 
   const steps: {
     titulo: string;
@@ -206,13 +222,14 @@ function Questionario() {
       ),
     },
     {
-      titulo: "Seu objetivo",
-      valido: !!form.objetivo,
+      titulo: "Seus objetivos",
+      sub: "a ordem de seleção define a prioridade",
+      valido: form.objetivos.length > 0,
       render: () => (
-        <Options
+        <PriorityOptions
           options={OBJETIVOS}
-          value={form.objetivo}
-          onChange={(v) => set("objetivo", v)}
+          values={form.objetivos}
+          onToggle={(v) => toggle("objetivos", v)}
         />
       ),
     },
@@ -220,26 +237,28 @@ function Questionario() {
       titulo: "Ênfase do treino",
       valido:
         !!form.foco &&
-        (form.foco !== "foco_customizado" || !!form.foco_grupo_customizado),
+        (form.foco !== "foco_customizado" || form.grupos_customizados.length > 0),
       render: () => (
         <div className="space-y-4">
           <Options options={FOCOS} value={form.foco} onChange={(v) => set("foco", v)} />
           {form.foco === "foco_customizado" && (
             <div className="rise-in">
               <p className="mb-2 text-sm uppercase tracking-widest text-gold">
-                Grupo muscular
+                Escolha de 1 a 3 grupos — a ordem define a prioridade
               </p>
-              <Options
+              <PriorityOptions
                 columns
+                max={3}
                 options={GRUPOS}
-                value={form.foco_grupo_customizado}
-                onChange={(v) => set("foco_grupo_customizado", v)}
+                values={form.grupos_customizados}
+                onToggle={(v) => toggle("grupos_customizados", v, 3)}
               />
             </div>
           )}
         </div>
       ),
     },
+
   ];
 
   const atual = steps[step]!;
@@ -258,12 +277,20 @@ function Questionario() {
         genero: form.genero,
         dias_por_semana: +form.dias_por_semana,
         tempo_treino_meses: +form.tempo_treino_meses,
-        objetivo: form.objetivo,
+        objetivo: form.objetivos[0]!,
+        objetivos_prioridade: form.objetivos,
         categoria: form.categoria,
         foco: form.foco,
         foco_grupo_customizado:
-          form.foco === "foco_customizado" ? form.foco_grupo_customizado : null,
+          form.foco === "foco_customizado" ? form.grupos_customizados[0]! : null,
+        focos_prioridade:
+          form.foco === "foco_customizado"
+            ? form.grupos_customizados.map(() => "foco_customizado")
+            : [form.foco],
+        focos_customizados_prioridade:
+          form.foco === "foco_customizado" ? form.grupos_customizados : [],
       };
+
 
       const profilePayload: typeof payload & { imc?: number | null } = { ...payload };
       delete profilePayload["imc"];
@@ -419,6 +446,59 @@ function Options({
             }`}
           >
             {o.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function PriorityOptions({
+  options,
+  values,
+  onToggle,
+  columns,
+  max,
+}: {
+  options: Opt[];
+  values: string[];
+  onToggle: (v: string) => void;
+  columns?: boolean;
+  max?: number;
+}) {
+  return (
+    <div className={columns ? "grid grid-cols-2 gap-3" : "space-y-3"}>
+      {options.map((o) => {
+        const idx = values.indexOf(o.value);
+        const on = idx >= 0;
+        const bloqueado = !on && !!max && values.length >= max;
+        const estilo = !on
+          ? "border-border bg-card text-muted-foreground hover:border-gold/60 hover:text-foreground"
+          : idx === 0
+            ? "border-primary bg-primary/20 text-foreground shadow-[var(--shadow-blood)]"
+            : idx === 1
+              ? "border-gold bg-gold/15 text-foreground"
+              : "border-gold/50 bg-gold/5 text-foreground";
+        return (
+          <button
+            key={o.value}
+            type="button"
+            disabled={bloqueado}
+            onClick={() => onToggle(o.value)}
+            className={`flex min-h-[56px] w-full items-center justify-between gap-3 rounded-sm border-2 px-4 py-3 text-left font-display text-lg uppercase tracking-wide transition-all disabled:opacity-40 ${estilo}`}
+          >
+            <span className="min-w-0">{o.label}</span>
+            {on && (
+              <span
+                className={`flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                  idx === 0
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-gold text-background"
+                }`}
+              >
+                {idx + 1}
+              </span>
+            )}
           </button>
         );
       })}
