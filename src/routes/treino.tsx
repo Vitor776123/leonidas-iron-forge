@@ -84,6 +84,7 @@ function TreinoPage() {
   const [criando, setCriando] = useState(false);
   const [menuAberto, setMenuAberto] = useState(false);
   const [excluindo, setExcluindo] = useState<WorkoutDay | null>(null);
+  const [excluindoEx, setExcluindoEx] = useState<WorkoutExercise | null>(null);
   const [adicionarEm, setAdicionarEm] = useState<WorkoutDay | null>(null);
   const [customIds, setCustomIds] = useState<string[]>([]);
 
@@ -122,7 +123,7 @@ function TreinoPage() {
       const { data: dias, error } = await supabase
         .from("workout_days")
         .select(
-          "id, ordem, rotulo, workout_exercises(id, workout_day_id, exercise_id, ordem, series, reps_min, reps_max, descanso_segundos, eh_bonus_foco, tecnica_avancada, exercises(id, name_pt, muscle, body_part, equipment, gif_url, instructions_pt, dificuldade))",
+          "id, ordem, rotulo, workout_exercises(id, workout_day_id, exercise_id, ordem, series, reps_min, reps_max, descanso_segundos, eh_bonus_foco, tecnica_avancada, concluido, observacao, exercises(id, name_pt, muscle, body_part, equipment, gif_url, instructions_pt, dificuldade))",
         )
         .eq("workout_plan_id", plan.id)
         .order("ordem");
@@ -195,6 +196,19 @@ function TreinoPage() {
     }
   }
 
+  async function excluirExercicio(we: WorkoutExercise) {
+    try {
+      const { error } = await supabase.from("workout_exercises").delete().eq("id", we.id);
+      if (error) throw error;
+      toast.success(`"${we.exercises?.name_pt ?? "Exercício"}" removido`);
+      queryClient.invalidateQueries({ queryKey: ["plano"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Falha ao remover exercício");
+    } finally {
+      setExcluindoEx(null);
+    }
+  }
+
   const menuBotao = (
     <button
       onClick={() => setMenuAberto(true)}
@@ -252,41 +266,55 @@ function TreinoPage() {
           </p>
         )}
         {ativo?.workout_exercises.map((we, i) => (
-          <button
+          <div
             key={we.id}
-            onClick={() => setDetalhe(we)}
-            className="surface-iron flex w-full items-center gap-4 rounded-sm border border-border p-4 text-left transition-colors hover:border-primary/70"
+            className={`surface-iron relative rounded-sm border border-border transition-colors hover:border-primary/70 ${
+              we.concluido ? "opacity-50" : ""
+            }`}
           >
-            <span className="font-display text-2xl text-muted-foreground">
-              {String(i + 1).padStart(2, "0")}
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h3 className="truncate text-xl leading-tight">
-                  {we.exercises?.name_pt ?? "Exercício"}
-                </h3>
-                {we.eh_bonus_foco && <Crown className="size-5 shrink-0 text-gold" />}
-              </div>
-              <p className="mt-0.5 text-sm uppercase tracking-wider text-muted-foreground">
-                {we.exercises?.muscle}
-              </p>
-              <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-base font-semibold">
-                <span>
-                  {we.series} × {we.reps_min}-{we.reps_max}
-                </span>
-                <span className="flex items-center gap-1 text-muted-foreground">
-                  <Timer className="size-4" />
-                  {we.descanso_segundos}s
-                </span>
-                {we.tecnica_avancada && (
-                  <span className="flex items-center gap-1 text-primary">
-                    <Zap className="size-4" />
-                    {we.tecnica_avancada}
+            <button
+              onClick={() => setDetalhe(we)}
+              className="flex w-full items-center gap-4 p-4 pr-14 text-left"
+            >
+              <span className="font-display text-2xl text-muted-foreground">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="truncate text-xl leading-tight">
+                    {we.exercises?.name_pt ?? "Exercício"}
+                  </h3>
+                  {we.concluido && <CheckCircle2 className="size-5 shrink-0 text-gold" />}
+                  {we.eh_bonus_foco && <Crown className="size-5 shrink-0 text-gold" />}
+                </div>
+                <p className="mt-0.5 text-sm uppercase tracking-wider text-muted-foreground">
+                  {we.exercises?.muscle}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-base font-semibold">
+                  <span>
+                    {we.series} × {we.reps_min}-{we.reps_max}
                   </span>
-                )}
+                  <span className="flex items-center gap-1 text-muted-foreground">
+                    <Timer className="size-4" />
+                    {we.descanso_segundos}s
+                  </span>
+                  {we.tecnica_avancada && (
+                    <span className="flex items-center gap-1 text-primary">
+                      <Zap className="size-4" />
+                      {we.tecnica_avancada}
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
-          </button>
+            </button>
+            <button
+              onClick={() => setExcluindoEx(we)}
+              aria-label={`Remover ${we.exercises?.name_pt ?? "exercício"}`}
+              className="absolute bottom-0 right-0 top-0 flex w-12 items-center justify-center text-muted-foreground/70 transition-colors active:text-primary"
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
         ))}
       </div>
 
@@ -352,6 +380,30 @@ function TreinoPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AlertDialog open={!!excluindoEx} onOpenChange={(o) => !o && setExcluindoEx(null)}>
+        <AlertDialogContent className="border-border bg-card">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-2xl uppercase">
+              Remover exercício?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Remover "{excluindoEx?.exercises?.name_pt}" do treino?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="h-12 font-display tracking-widest">
+              CANCELAR
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="h-12 bg-primary font-display tracking-widest"
+              onClick={() => excluindoEx && excluirExercicio(excluindoEx)}
+            >
+              REMOVER
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <CriarDiaDialog
         open={criando}
         planId={data?.planId ?? null}
@@ -381,6 +433,7 @@ function TreinoPage() {
           setDetalhe(null);
           setTrocando(we);
         }}
+        onChanged={() => queryClient.invalidateQueries({ queryKey: ["plano"] })}
       />
 
       <TrocaDialog
