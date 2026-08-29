@@ -179,7 +179,14 @@ function TreinoPage() {
             </button>
           );
         })}
+        <button
+          onClick={() => setCriando(true)}
+          className="shrink-0 rounded-sm border-2 border-dashed border-gold/60 px-4 py-3 font-display text-base uppercase tracking-wide text-gold"
+        >
+          <Plus className="mr-1 inline size-4" /> Novo dia
+        </button>
       </div>
+
 
       <div key={ativo?.id} className="rise-in mt-6 space-y-3">
         {ativo?.workout_exercises.map((we, i) => (
