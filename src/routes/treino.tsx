@@ -84,6 +84,7 @@ function TreinoPage() {
   const [criando, setCriando] = useState(false);
   const [menuAberto, setMenuAberto] = useState(false);
   const [excluindo, setExcluindo] = useState<WorkoutDay | null>(null);
+  const [excluindoEx, setExcluindoEx] = useState<WorkoutExercise | null>(null);
   const [adicionarEm, setAdicionarEm] = useState<WorkoutDay | null>(null);
   const [customIds, setCustomIds] = useState<string[]>([]);
 
@@ -192,6 +193,19 @@ function TreinoPage() {
       toast.error(err instanceof Error ? err.message : "Falha ao excluir o dia");
     } finally {
       setExcluindo(null);
+    }
+  }
+
+  async function excluirExercicio(we: WorkoutExercise) {
+    try {
+      const { error } = await supabase.from("workout_exercises").delete().eq("id", we.id);
+      if (error) throw error;
+      toast.success(`"${we.exercises?.name_pt ?? "Exercício"}" removido`);
+      queryClient.invalidateQueries({ queryKey: ["plano"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Falha ao remover exercício");
+    } finally {
+      setExcluindoEx(null);
     }
   }
 
