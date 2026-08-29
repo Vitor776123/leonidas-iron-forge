@@ -212,13 +212,14 @@ function Questionario() {
       ),
     },
     {
-      titulo: "Seu objetivo",
-      valido: !!form.objetivo,
+      titulo: "Seus objetivos",
+      sub: "a ordem de seleção define a prioridade",
+      valido: form.objetivos.length > 0,
       render: () => (
-        <Options
+        <PriorityOptions
           options={OBJETIVOS}
-          value={form.objetivo}
-          onChange={(v) => set("objetivo", v)}
+          values={form.objetivos}
+          onToggle={(v) => toggle("objetivos", v)}
         />
       ),
     },
@@ -226,26 +227,28 @@ function Questionario() {
       titulo: "Ênfase do treino",
       valido:
         !!form.foco &&
-        (form.foco !== "foco_customizado" || !!form.foco_grupo_customizado),
+        (form.foco !== "foco_customizado" || form.grupos_customizados.length > 0),
       render: () => (
         <div className="space-y-4">
           <Options options={FOCOS} value={form.foco} onChange={(v) => set("foco", v)} />
           {form.foco === "foco_customizado" && (
             <div className="rise-in">
               <p className="mb-2 text-sm uppercase tracking-widest text-gold">
-                Grupo muscular
+                Escolha de 1 a 3 grupos — a ordem define a prioridade
               </p>
-              <Options
+              <PriorityOptions
                 columns
+                max={3}
                 options={GRUPOS}
-                value={form.foco_grupo_customizado}
-                onChange={(v) => set("foco_grupo_customizado", v)}
+                values={form.grupos_customizados}
+                onToggle={(v) => toggle("grupos_customizados", v, 3)}
               />
             </div>
           )}
         </div>
       ),
     },
+
   ];
 
   const atual = steps[step]!;
