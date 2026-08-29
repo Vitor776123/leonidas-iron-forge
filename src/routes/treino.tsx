@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Crown, Repeat, Timer, Zap } from "lucide-react";
+import { CheckCircle2, Crown, Plus, Repeat, Search, Timer, Zap } from "lucide-react";
 import {
   supabase,
   type Exercise,
@@ -228,6 +228,38 @@ function TreinoPage() {
         ))}
       </div>
 
+      {!!ativo && (
+        <div className="mt-8 space-y-3">
+          <Button
+            disabled={finalizando}
+            onClick={finalizarDia}
+            className="h-14 w-full font-display text-lg tracking-widest"
+          >
+            <CheckCircle2 className="mr-1 size-6" />
+            {finalizando ? "SALVANDO..." : "TREINO FINALIZADO"}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => setCriando(true)}
+            className="h-12 w-full font-display tracking-widest"
+          >
+            <Plus className="mr-1 size-5" /> CRIAR TREINO PERSONALIZADO
+          </Button>
+        </div>
+      )}
+
+      <CriarDiaDialog
+        open={criando}
+        planId={data?.planId ?? null}
+        proximaOrdem={dias.length ? Math.max(...dias.map((d) => d.ordem)) + 1 : 1}
+        onClose={() => setCriando(false)}
+        onCreated={(id) => {
+          setCriando(false);
+          setDiaAtivo(id);
+          queryClient.invalidateQueries({ queryKey: ["plano"] });
+        }}
+      />
+
       <DetalheDialog
         item={detalhe}
         onClose={() => setDetalhe(null)}
@@ -397,6 +429,199 @@ function TrocaDialog({
             <p className="text-muted-foreground">Nenhuma alternativa encontrada.</p>
           )}
         </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
+const PADRAO = { series: 3, reps_min: 8, reps_max: 12, descanso_segundos: 75 };
+
+const MUSCULOS = [
+  "abductors","abs","adductors","biceps","calves","delts","forearms","glutes",
+  "hamstrings","lats","pectorals","quads","traps","triceps","upper back",
+];
+
+function CriarDiaDialog({
+  open,
+  planId,
+  proximaOrdem,
+  onClose,
+  onCreated,
+}: {
+  open: boolean;
+  planId: string | null;
+  proximaOrdem: number;
+  onClose: () => void;
+  onCreated: (dayId: string) => void;
+}) {
+  const [rotulo, setRotulo] = useState("");
+  const [dayId, setDayId] = useState<string | null>(null);
+  const [busca, setBusca] = useState("");
+  const [musculo, setMusculo] = useState<string | null>(null);
+  const [adicionados, setAdicionados] = useState<string[]>([]);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setRotulo("");
+      setDayId(null);
+      setBusca("");
+      setMusculo(null);
+      setAdicionados([]);
+    }
+  }, [open]);
+
+  const { data: lista, isLoading } = useQuery({
+    queryKey: ["ex-busca", busca, musculo],
+    enabled: open && !!dayId,
+    queryFn: async () => {
+      let q = supabase
+        .from("exercises")
+        .select("id, name_pt, muscle, body_part, equipment, gif_url, instructions_pt, dificuldade")
+        .order("name_pt")
+        .limit(50);
+      if (busca.trim()) q = q.ilike("name_pt", `%${busca.trim()}%`);
+      if (musculo) q = q.eq("muscle", musculo);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as Exercise[];
+    },
+  });
+
+  async function criarDia() {
+    if (!planId || rotulo.trim().length < 2) return;
+    setBusy(true);
+    try {
+      const { data, error } = await supabase
+        .from("workout_days")
+        .insert({ workout_plan_id: planId, rotulo: rotulo.trim(), ordem: proximaOrdem })
+        .select("id")
+        .single();
+      if (error) throw error;
+      setDayId(data.id as string);
+      toast.success("Dia criado. Agora adicione exercícios.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Falha ao criar o dia");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function adicionar(ex: Exercise) {
+    if (!dayId) return;
+    setBusy(true);
+    try {
+      const { error } = await supabase.from("workout_exercises").insert({
+        workout_day_id: dayId,
+        exercise_id: ex.id,
+        ordem: adicionados.length + 1,
+        ...PADRAO,
+        eh_bonus_foco: false,
+      });
+      if (error) throw error;
+      setAdicionados((a) => [...a, ex.name_pt]);
+      toast.success(`${ex.name_pt} adicionado`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Falha ao adicionar exercício");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[88vh] overflow-y-auto border-border bg-card sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="text-left font-display text-2xl uppercase">
+            {dayId ? `Exercícios — ${rotulo}` : "Novo dia personalizado"}
+          </DialogTitle>
+        </DialogHeader>
+
+        {!dayId ? (
+          <div className="space-y-4">
+            <Input
+              autoFocus
+              value={rotulo}
+              placeholder="Ex: Peito, Ombro e Tríceps"
+              onChange={(e) => setRotulo(e.target.value)}
+              className="h-14 rounded-sm border-2 bg-secondary text-lg"
+            />
+            <Button
+              disabled={busy || rotulo.trim().length < 2 || !planId}
+              onClick={criarDia}
+              className="h-12 w-full font-display tracking-widest"
+            >
+              CRIAR DIA
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={busca}
+                placeholder="Buscar exercício..."
+                onChange={(e) => setBusca(e.target.value)}
+                className="h-12 rounded-sm border-2 bg-secondary pl-10"
+              />
+            </div>
+            <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+              <button
+                onClick={() => setMusculo(null)}
+                className={`shrink-0 rounded-sm border px-3 py-2 text-sm uppercase ${!musculo ? "border-primary text-foreground" : "border-border text-muted-foreground"}`}
+              >
+                Todos
+              </button>
+              {MUSCULOS.map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setMusculo(m)}
+                  className={`shrink-0 rounded-sm border px-3 py-2 text-sm uppercase ${musculo === m ? "border-primary text-foreground" : "border-border text-muted-foreground"}`}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+
+            {isLoading && <p className="text-muted-foreground">Carregando...</p>}
+            <div className="space-y-2">
+              {lista?.map((ex) => (
+                <button
+                  key={ex.id}
+                  disabled={busy}
+                  onClick={() => adicionar(ex)}
+                  className="flex w-full items-center gap-3 rounded-sm border border-border bg-secondary/60 p-3 text-left transition-colors hover:border-gold disabled:opacity-50"
+                >
+                  {ex.gif_url && (
+                    <img
+                      src={ex.gif_url}
+                      alt={ex.name_pt}
+                      loading="lazy"
+                      className="size-12 shrink-0 rounded-sm object-cover"
+                    />
+                  )}
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-display text-base uppercase">
+                      {ex.name_pt}
+                    </span>
+                    <span className="block text-xs text-muted-foreground">{ex.muscle}</span>
+                  </span>
+                  <Plus className="size-5 shrink-0 text-gold" />
+                </button>
+              ))}
+            </div>
+
+            <Button
+              variant="secondary"
+              className="h-12 w-full font-display tracking-widest"
+              disabled={!adicionados.length}
+              onClick={() => onCreated(dayId)}
+            >
+              CONCLUIR ({adicionados.length})
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
