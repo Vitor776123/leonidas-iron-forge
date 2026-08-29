@@ -54,12 +54,13 @@ function TreinoPage() {
     queryKey: ["plano", user?.id],
     enabled: !!user,
     queryFn: async () => {
+      const vazio = { semPerfil: false, planId: null as string | null, atualId: null as string | null, dias: [] as WorkoutDay[] };
       const { data: profile } = await supabase
         .from("profiles")
         .select("id")
         .eq("user_id", user!.id)
         .maybeSingle();
-      if (!profile) return { semPerfil: true, dias: [] as WorkoutDay[] };
+      if (!profile) return { ...vazio, semPerfil: true };
 
       const { data: plan } = await supabase
         .from("workout_plans")
@@ -67,7 +68,7 @@ function TreinoPage() {
         .eq("profile_id", profile.id)
         .eq("ativo", true)
         .maybeSingle();
-      if (!plan) return { semPerfil: false, dias: [] as WorkoutDay[] };
+      if (!plan) return vazio;
 
       const { data: dias, error } = await supabase
         .from("workout_days")
@@ -78,13 +79,22 @@ function TreinoPage() {
         .order("ordem");
       if (error) throw error;
 
+      const { data: atualId } = await supabase.rpc("get_current_workout_day", {
+        p_plan_id: plan.id,
+      });
+
       const normalizados = ((dias ?? []) as unknown as WorkoutDay[]).map((d) => ({
         ...d,
         workout_exercises: [...(d.workout_exercises ?? [])].sort(
           (a, b) => a.ordem - b.ordem,
         ),
       }));
-      return { semPerfil: false, dias: normalizados };
+      return {
+        semPerfil: false,
+        planId: plan.id as string,
+        atualId: (atualId as string | null) ?? null,
+        dias: normalizados,
+      };
     },
   });
 
@@ -92,8 +102,31 @@ function TreinoPage() {
     if (data?.semPerfil) navigate({ to: "/questionario", replace: true });
   }, [data, navigate]);
 
+  useEffect(() => {
+    if (!diaAtivo && data?.atualId) setDiaAtivo(data.atualId);
+  }, [data?.atualId, diaAtivo]);
+
   const dias = data?.dias ?? [];
   const ativo = dias.find((d) => d.id === diaAtivo) ?? dias[0];
+
+  async function finalizarDia() {
+    if (!ativo) return;
+    setFinalizando(true);
+    try {
+      const { data: proximo, error } = await supabase.rpc("complete_workout_day", {
+        p_day_id: ativo.id,
+      });
+      if (error) throw error;
+      toast.success("Treino finalizado. Boa!");
+      if (proximo) setDiaAtivo(proximo as string);
+      queryClient.invalidateQueries({ queryKey: ["plano"] });
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Falha ao finalizar treino");
+    } finally {
+      setFinalizando(false);
+    }
+  }
+
 
   if (isLoading) {
     return (
