@@ -277,12 +277,20 @@ function Questionario() {
         genero: form.genero,
         dias_por_semana: +form.dias_por_semana,
         tempo_treino_meses: +form.tempo_treino_meses,
-        objetivo: form.objetivo,
+        objetivo: form.objetivos[0]!,
+        objetivos_prioridade: form.objetivos,
         categoria: form.categoria,
         foco: form.foco,
         foco_grupo_customizado:
-          form.foco === "foco_customizado" ? form.foco_grupo_customizado : null,
+          form.foco === "foco_customizado" ? form.grupos_customizados[0]! : null,
+        focos_prioridade:
+          form.foco === "foco_customizado"
+            ? form.grupos_customizados.map(() => "foco_customizado")
+            : [form.foco],
+        focos_customizados_prioridade:
+          form.foco === "foco_customizado" ? form.grupos_customizados : [],
       };
+
 
       const profilePayload: typeof payload & { imc?: number | null } = { ...payload };
       delete profilePayload["imc"];
