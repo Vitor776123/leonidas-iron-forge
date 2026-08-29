@@ -438,6 +438,13 @@ function TrocaDialog({
 
 const PADRAO = { series: 3, reps_min: 8, reps_max: 12, descanso_segundos: 75 };
 
+const EQUIPAMENTOS: { key: string; label: string; values: string[] }[] = [
+  { key: "maquinas", label: "Máquinas", values: ["machine", "lever"] },
+  { key: "corpo", label: "Peso do corpo", values: ["bodyweight"] },
+  { key: "halteres", label: "Halteres", values: ["dumbbell"] },
+  { key: "elastico", label: "Elástico", values: ["band"] },
+];
+
 const MUSCULOS = [
   "abductors","abs","adductors","biceps","calves","delts","forearms","glutes",
   "hamstrings","lats","pectorals","quads","traps","triceps","upper back",
@@ -460,6 +467,7 @@ function CriarDiaDialog({
   const [dayId, setDayId] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [musculo, setMusculo] = useState<string | null>(null);
+  const [equipos, setEquipos] = useState<string[]>([]);
   const [adicionados, setAdicionados] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
 
@@ -469,12 +477,13 @@ function CriarDiaDialog({
       setDayId(null);
       setBusca("");
       setMusculo(null);
+      setEquipos([]);
       setAdicionados([]);
     }
   }, [open]);
 
   const { data: lista, isLoading } = useQuery({
-    queryKey: ["ex-busca", busca, musculo],
+    queryKey: ["ex-busca", busca, musculo, equipos.join(",")],
     enabled: open && !!dayId,
     queryFn: async () => {
       let q = supabase
@@ -484,6 +493,10 @@ function CriarDiaDialog({
         .limit(50);
       if (busca.trim()) q = q.ilike("name_pt", `%${busca.trim()}%`);
       if (musculo) q = q.eq("muscle", musculo);
+      if (equipos.length) {
+        const vals = equipos.flatMap((k) => EQUIPAMENTOS.find((e) => e.key === k)?.values ?? []);
+        if (vals.length) q = q.in("equipment", vals);
+      }
       const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as Exercise[];
@@ -558,6 +571,35 @@ function CriarDiaDialog({
           </div>
         ) : (
           <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              {EQUIPAMENTOS.map((eq) => {
+                const on = equipos.includes(eq.key);
+                return (
+                  <label
+                    key={eq.key}
+                    className={`flex min-h-[44px] cursor-pointer items-center gap-2 rounded-sm border-2 px-3 py-2 text-sm uppercase tracking-wide transition-colors ${
+                      on
+                        ? "border-primary bg-primary/15 text-foreground"
+                        : "border-border bg-secondary/50 text-muted-foreground"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={on}
+                      onChange={() =>
+                        setEquipos((cur) =>
+                          cur.includes(eq.key)
+                            ? cur.filter((k) => k !== eq.key)
+                            : [...cur, eq.key],
+                        )
+                      }
+                      className="size-4 accent-[hsl(var(--primary))]"
+                    />
+                    {eq.label}
+                  </label>
+                );
+              })}
+            </div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-muted-foreground" />
               <Input
