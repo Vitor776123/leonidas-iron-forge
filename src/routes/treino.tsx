@@ -433,6 +433,7 @@ function TreinoPage() {
           setDetalhe(null);
           setTrocando(we);
         }}
+        onChanged={() => queryClient.invalidateQueries({ queryKey: ["plano"] })}
       />
 
       <TrocaDialog
