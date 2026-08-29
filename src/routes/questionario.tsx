@@ -52,17 +52,22 @@ const FOCOS: Opt[] = [
   { label: "Equilibrado", value: "equilibrado" },
   { label: "Foco customizado", value: "foco_customizado" },
 ];
-const GRUPOS = [
-  "Peito",
-  "Costas",
-  "Ombros",
-  "Bíceps",
-  "Tríceps",
-  "Quadríceps",
-  "Posterior de coxa",
-  "Glúteo",
-  "Panturrilha",
-  "Abdômen",
+const GRUPOS: Opt[] = [
+  { label: "Abdutores", value: "abductors" },
+  { label: "Abdômen", value: "abs" },
+  { label: "Adutores", value: "adductors" },
+  { label: "Bíceps", value: "biceps" },
+  { label: "Panturrilhas", value: "calves" },
+  { label: "Deltoides", value: "delts" },
+  { label: "Antebraços", value: "forearms" },
+  { label: "Glúteos", value: "glutes" },
+  { label: "Posterior de coxa", value: "hamstrings" },
+  { label: "Dorsais", value: "lats" },
+  { label: "Peitorais", value: "pectorals" },
+  { label: "Quadríceps", value: "quads" },
+  { label: "Trapézio", value: "traps" },
+  { label: "Tríceps", value: "triceps" },
+  { label: "Parte superior das costas", value: "upper back" },
 ];
 
 type Form = {
@@ -74,9 +79,9 @@ type Form = {
   dias_por_semana: string;
   tempo_treino_meses: string;
   categoria: string;
-  objetivo: string;
+  objetivos: string[];
   foco: string;
-  foco_grupo_customizado: string;
+  grupos_customizados: string[];
 };
 
 const EMPTY: Form = {
@@ -88,10 +93,11 @@ const EMPTY: Form = {
   dias_por_semana: "",
   tempo_treino_meses: "",
   categoria: "",
-  objetivo: "",
+  objetivos: [],
   foco: "",
-  foco_grupo_customizado: "",
+  grupos_customizados: [],
 };
+
 
 function Questionario() {
   const { user, loading } = useAuth();
