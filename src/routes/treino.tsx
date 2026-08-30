@@ -476,6 +476,8 @@ function TreinoPage() {
 
       <DetalheDialog
         item={detalhe}
+        lista={ativo?.workout_exercises ?? []}
+        onAdvance={(we) => setDetalhe(we)}
         onClose={() => setDetalhe(null)}
         onTrocar={(we) => {
           setDetalhe(null);
