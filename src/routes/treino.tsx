@@ -505,6 +505,7 @@ function DiasDrawer({
   onSelect,
   onDelete,
   onCriar,
+  onReorder,
 }: {
   open: boolean;
   onOpenChange: (o: boolean) => void;
@@ -514,22 +515,23 @@ function DiasDrawer({
   onSelect: (id: string) => void;
   onDelete: (d: WorkoutDay) => void;
   onCriar: () => void;
+  onReorder: (ids: string[], secao: "gerado" | "custom") => void;
 }) {
   const gerados = dias.filter((d) => !customIds.includes(d.id));
   const personalizados = dias.filter((d) => customIds.includes(d.id));
 
-  const item = (d: WorkoutDay) => (
+  const item = (d: WorkoutDay, handle: ReactNode) => (
     <div
-      key={d.id}
       className={`flex items-stretch overflow-hidden rounded-sm border-2 transition-colors ${
         ativoId === d.id
           ? "border-primary bg-primary/15"
           : "border-border bg-secondary/40"
       }`}
     >
+      {handle}
       <button
         onClick={() => onSelect(d.id)}
-        className="min-h-[52px] min-w-0 flex-1 px-4 py-3 text-left font-display text-base uppercase tracking-wide"
+        className="min-h-[52px] min-w-0 flex-1 py-3 pr-2 text-left font-display text-base uppercase tracking-wide"
       >
         <span className={`block truncate ${ativoId === d.id ? "text-primary" : "text-foreground"}`}>
           {d.rotulo}
@@ -556,12 +558,19 @@ function DiasDrawer({
       >
         <div className="border-b border-border px-5 py-4">
           <h2 className="font-display text-2xl uppercase tracking-widest">Dias</h2>
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">
+            Arraste pela alça para reordenar
+          </p>
         </div>
         <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
           {!!gerados.length && (
             <section className="space-y-2">
               <h3 className="text-xs uppercase tracking-[0.25em] text-gold">Treino Gerado</h3>
-              {gerados.map(item)}
+              <SortableList
+                items={gerados}
+                onReorder={(ids) => onReorder(ids, "gerado")}
+                renderItem={(d, handle) => item(d, handle)}
+              />
             </section>
           )}
           {!!personalizados.length && (
@@ -569,10 +578,15 @@ function DiasDrawer({
               <h3 className="text-xs uppercase tracking-[0.25em] text-gold">
                 Treinos Personalizados
               </h3>
-              {personalizados.map(item)}
+              <SortableList
+                items={personalizados}
+                onReorder={(ids) => onReorder(ids, "custom")}
+                renderItem={(d, handle) => item(d, handle)}
+              />
             </section>
           )}
         </div>
+
         <div className="border-t border-border p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <Button onClick={onCriar} className="h-12 w-full font-display tracking-widest">
             <Plus className="mr-1 size-5" /> CRIAR TREINO PERSONALIZADO
