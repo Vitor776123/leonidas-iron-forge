@@ -614,6 +614,25 @@ function DetalheDialog({
           )}
           {item?.eh_bonus_foco && <span className="text-gold">Bônus de foco</span>}
         </div>
+
+        <div className="mt-2 space-y-2">
+          <label htmlFor="obs-exercicio" className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Anotação
+          </label>
+          <textarea
+            id="obs-exercicio"
+            value={obs}
+            onChange={(e) => setObs(e.target.value)}
+            onBlur={salvarObs}
+            rows={2}
+            placeholder="Anotação (ex: carga usada, ajuste, sensação)"
+            className="min-h-[56px] w-full resize-y rounded-sm border border-input bg-secondary/60 px-3 py-2.5 text-base placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+          {salvandoObs && (
+            <p className="text-xs uppercase tracking-widest text-muted-foreground">Salvando...</p>
+          )}
+        </div>
+
         {!!ex?.instructions_pt?.length && (
           <ol className="mt-2 space-y-2">
             {ex.instructions_pt.map((p, i) => (
@@ -624,13 +643,28 @@ function DetalheDialog({
             ))}
           </ol>
         )}
-        <Button
-          variant="secondary"
-          className="mt-2 h-12 font-display tracking-widest"
-          onClick={() => item && onTrocar(item)}
-        >
-          <Repeat className="mr-1 size-5" /> TROCAR EXERCÍCIO
-        </Button>
+
+        <div className="sticky bottom-0 -mx-1 mt-2 space-y-3 bg-card px-1 pb-1 pt-3">
+          <button
+            onClick={() => marcarConcluido(!concluido)}
+            aria-pressed={concluido}
+            className={`flex min-h-[56px] w-full items-center justify-center gap-3 rounded-sm border-2 font-display text-lg uppercase tracking-widest transition-colors ${
+              concluido
+                ? "border-gold bg-gold/15 text-gold"
+                : "border-border bg-secondary/60 text-foreground active:bg-secondary"
+            }`}
+          >
+            <CheckCircle2 className="size-6" />
+            {concluido ? "Concluído" : "Marcar como concluído"}
+          </button>
+          <Button
+            variant="secondary"
+            className="h-12 w-full font-display tracking-widest"
+            onClick={() => item && onTrocar(item)}
+          >
+            <Repeat className="mr-1 size-5" /> TROCAR EXERCÍCIO
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
