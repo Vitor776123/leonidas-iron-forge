@@ -211,6 +211,50 @@ function TreinoPage() {
     }
   }
 
+  async function reordenarDias(idsSecao: string[], secao: "gerado" | "custom") {
+    const gerados = dias.filter((d) => !customIds.includes(d.id)).map((d) => d.id);
+    const personalizados = dias.filter((d) => customIds.includes(d.id)).map((d) => d.id);
+    const finais =
+      secao === "gerado" ? [...idsSecao, ...personalizados] : [...gerados, ...idsSecao];
+    try {
+      await Promise.all(
+        finais.map((id, i) =>
+          supabase.from("workout_days").update({ ordem: i + 1 }).eq("id", id),
+        ),
+      );
+      await queryClient.invalidateQueries({ queryKey: ["plano"] });
+      toast.success("Ordem dos dias atualizada");
+    } catch {
+      toast.error("Falha ao reordenar os dias");
+    }
+  }
+
+  async function reordenarExercicios(ids: string[]) {
+    try {
+      await Promise.all(
+        ids.map((id, i) =>
+          supabase.from("workout_exercises").update({ ordem: i + 1 }).eq("id", id),
+        ),
+      );
+      await queryClient.invalidateQueries({ queryKey: ["plano"] });
+    } catch {
+      toast.error("Falha ao reordenar exercícios");
+    }
+  }
+
+  async function salvarSeriesReps(
+    we: WorkoutExercise,
+    v: { series: number; reps_min: number; reps_max: number },
+  ) {
+    const { error } = await supabase.from("workout_exercises").update(v).eq("id", we.id);
+    if (error) {
+      toast.error("Falha ao salvar séries/reps");
+      return;
+    }
+    toast.success("Séries e repetições atualizadas");
+    queryClient.invalidateQueries({ queryKey: ["plano"] });
+  }
+
   const menuBotao = (
     <button
       onClick={() => setMenuAberto(true)}
