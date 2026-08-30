@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 import {
   CheckCircle2,
@@ -476,6 +476,8 @@ function TreinoPage() {
 
       <DetalheDialog
         item={detalhe}
+        lista={ativo?.workout_exercises ?? []}
+        onAdvance={(we) => setDetalhe(we)}
         onClose={() => setDetalhe(null)}
         onTrocar={(we) => {
           setDetalhe(null);
@@ -597,16 +599,100 @@ function DiasDrawer({
   );
 }
 
+function SeriesRepsEditor({
+  item,
+  onSave,
+}: {
+  item: WorkoutExercise;
+  onSave: (v: { series: number; reps_min: number; reps_max: number }) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [series, setSeries] = useState(String(item.series));
+  const [min, setMin] = useState(String(item.reps_min));
+  const [max, setMax] = useState(String(item.reps_max));
+
+  useEffect(() => {
+    if (open) {
+      setSeries(String(item.series));
+      setMin(String(item.reps_min));
+      setMax(String(item.reps_max));
+    }
+  }, [open, item.series, item.reps_min, item.reps_max]);
+
+  function confirmar() {
+    const s = Number(series);
+    const a = Number(min);
+    const b = Number(max);
+    if (!s || !a || !b || a > b) {
+      toast.error("Valores inválidos");
+      return;
+    }
+    onSave({ series: s, reps_min: a, reps_max: b });
+    setOpen(false);
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <button className="rounded-sm border border-dashed border-border px-2 py-1 text-base font-semibold transition-colors active:border-primary active:text-primary">
+          {item.series} × {item.reps_min}-{item.reps_max}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-72 border-border bg-card p-4">
+        <p className="mb-3 text-xs uppercase tracking-[0.2em] text-gold">Séries e repetições</p>
+        <div className="flex items-end gap-2">
+          <CampoNum label="Séries" value={series} onChange={setSeries} />
+          <CampoNum label="Rep. mín" value={min} onChange={setMin} />
+          <CampoNum label="Rep. máx" value={max} onChange={setMax} />
+        </div>
+        <Button onClick={confirmar} className="mt-4 h-11 w-full font-display tracking-widest">
+          SALVAR
+        </Button>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function CampoNum({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <label className="min-w-0 flex-1 space-y-1">
+      <span className="block text-[10px] uppercase tracking-widest text-muted-foreground">
+        {label}
+      </span>
+      <Input
+        type="number"
+        inputMode="numeric"
+        min={1}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="h-12 rounded-sm border-2 bg-secondary text-center text-lg"
+      />
+    </label>
+  );
+}
+
 function DetalheDialog({
   item,
+  lista,
   onClose,
   onTrocar,
   onChanged,
+  onAdvance,
 }: {
   item: WorkoutExercise | null;
+  lista: WorkoutExercise[];
   onClose: () => void;
   onTrocar: (we: WorkoutExercise) => void;
   onChanged: () => void;
+  onAdvance: (we: WorkoutExercise) => void;
 }) {
   const ex = item?.exercises;
   const [concluido, setConcluido] = useState(false);
@@ -628,10 +714,21 @@ function DetalheDialog({
     if (error) {
       setConcluido(!v);
       toast.error("Falha ao salvar");
+      return;
+    }
+    onChanged();
+    if (!v) return;
+
+    const i = lista.findIndex((w) => w.id === item.id);
+    const proximo = i >= 0 ? lista[i + 1] : undefined;
+    if (proximo) {
+      setTimeout(() => onAdvance(proximo), 260);
     } else {
-      onChanged();
+      toast.success("Último exercício do dia!");
+      setTimeout(onClose, 900);
     }
   }
+
 
   async function salvarObs() {
     if (!item) return;
@@ -652,7 +749,10 @@ function DetalheDialog({
   }
   return (
     <Dialog open={!!item} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto overflow-x-hidden border-border bg-card p-4 sm:p-6">
+      <DialogContent
+        key={item?.id}
+        className="swipe-next max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto overflow-x-hidden border-border bg-card p-4 sm:p-6"
+      >
         <DialogHeader>
           <DialogTitle className="text-left font-display text-2xl uppercase leading-tight">
             {ex?.name_pt}
