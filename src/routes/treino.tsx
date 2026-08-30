@@ -389,6 +389,7 @@ function TreinoPage() {
         dias={dias}
         ativoId={ativo?.id ?? null}
         customIds={customIds}
+        onReorder={reordenarDias}
         onSelect={(id) => {
           setDiaAtivo(id);
           setMenuAberto(false);
