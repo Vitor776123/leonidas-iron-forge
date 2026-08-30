@@ -539,12 +539,55 @@ function DetalheDialog({
   item,
   onClose,
   onTrocar,
+  onChanged,
 }: {
   item: WorkoutExercise | null;
   onClose: () => void;
   onTrocar: (we: WorkoutExercise) => void;
+  onChanged: () => void;
 }) {
   const ex = item?.exercises;
+  const [concluido, setConcluido] = useState(false);
+  const [obs, setObs] = useState("");
+  const [salvandoObs, setSalvandoObs] = useState(false);
+
+  useEffect(() => {
+    setConcluido(!!item?.concluido);
+    setObs(item?.observacao ?? "");
+  }, [item?.id, item?.concluido, item?.observacao]);
+
+  async function marcarConcluido(v: boolean) {
+    if (!item) return;
+    setConcluido(v);
+    const { error } = await supabase
+      .from("workout_exercises")
+      .update({ concluido: v })
+      .eq("id", item.id);
+    if (error) {
+      setConcluido(!v);
+      toast.error("Falha ao salvar");
+    } else {
+      onChanged();
+    }
+  }
+
+  async function salvarObs() {
+    if (!item) return;
+    const texto = obs.trim();
+    if (texto === (item.observacao ?? "")) return;
+    setSalvandoObs(true);
+    const { error } = await supabase
+      .from("workout_exercises")
+      .update({ observacao: texto || null })
+      .eq("id", item.id);
+    setSalvandoObs(false);
+    if (error) {
+      toast.error("Falha ao salvar anotação");
+    } else {
+      toast.success("Anotação salva");
+      onChanged();
+    }
+  }
   return (
     <Dialog open={!!item} onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card sm:max-w-lg">
