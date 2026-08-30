@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as ProgressoRouteImport } from './routes/progresso'
 import { Route as QuestionarioRouteImport } from './routes/questionario'
 import { Route as TreinoRouteImport } from './routes/treino'
 
@@ -30,6 +31,11 @@ const PerfilRoute = PerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProgressoRoute = ProgressoRouteImport.update({
+  id: '/progresso',
+  path: '/progresso',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const QuestionarioRoute = QuestionarioRouteImport.update({
   id: '/questionario',
   path: '/questionario',
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/perfil': typeof PerfilRoute
+  '/progresso': typeof ProgressoRoute
   '/questionario': typeof QuestionarioRoute
   '/treino': typeof TreinoRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/perfil': typeof PerfilRoute
+  '/progresso': typeof ProgressoRoute
   '/questionario': typeof QuestionarioRoute
   '/treino': typeof TreinoRoute
 }
@@ -60,21 +68,31 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/perfil': typeof PerfilRoute
+  '/progresso': typeof ProgressoRoute
   '/questionario': typeof QuestionarioRoute
   '/treino': typeof TreinoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/perfil' | '/questionario' | '/treino'
+  fullPaths:
+    '/' | '/auth' | '/perfil' | '/progresso' | '/questionario' | '/treino'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/perfil' | '/questionario' | '/treino'
-  id: '__root__' | '/' | '/auth' | '/perfil' | '/questionario' | '/treino'
+  to: '/' | '/auth' | '/perfil' | '/progresso' | '/questionario' | '/treino'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/perfil'
+    | '/progresso'
+    | '/questionario'
+    | '/treino'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
   PerfilRoute: typeof PerfilRoute
+  ProgressoRoute: typeof ProgressoRoute
   QuestionarioRoute: typeof QuestionarioRoute
   TreinoRoute: typeof TreinoRoute
 }
@@ -102,6 +120,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PerfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/progresso': {
+      id: '/progresso'
+      path: '/progresso'
+      fullPath: '/progresso'
+      preLoaderRoute: typeof ProgressoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/questionario': {
       id: '/questionario'
       path: '/questionario'
@@ -123,6 +148,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   PerfilRoute: PerfilRoute,
+  ProgressoRoute: ProgressoRoute,
   QuestionarioRoute: QuestionarioRoute,
   TreinoRoute: TreinoRoute,
 }
