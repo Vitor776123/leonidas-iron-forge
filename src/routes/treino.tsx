@@ -751,6 +751,7 @@ function DetalheDialog({
     <Dialog open={!!item} onOpenChange={(o) => !o && onClose()}>
       <DialogContent
         key={item?.id}
+        onOpenAutoFocus={(e) => e.preventDefault()}
         className="swipe-next max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto overflow-x-hidden border-border bg-card p-4 sm:p-6"
       >
         <DialogHeader>
