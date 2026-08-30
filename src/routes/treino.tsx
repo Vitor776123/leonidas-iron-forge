@@ -305,41 +305,41 @@ function TreinoPage() {
         <Plus className="mr-1 size-5" /> ADICIONAR EXERCÍCIO
       </Button>
 
-      <div key={ativo?.id} className="rise-in mt-5 space-y-3">
+      <div key={ativo?.id} className="rise-in mt-5">
         {ativo?.workout_exercises.length === 0 && (
           <p className="rounded-sm border border-dashed border-border p-6 text-center text-muted-foreground">
             Nenhum exercício neste dia ainda.
           </p>
         )}
-        {ativo?.workout_exercises.map((we, i) => (
-          <div
-            key={we.id}
-            className={`surface-iron relative rounded-sm border border-border transition-colors hover:border-primary/70 ${
-              we.concluido ? "opacity-50" : ""
-            }`}
-          >
-            <button
-              onClick={() => setDetalhe(we)}
-              className="flex w-full items-center gap-4 p-4 pr-14 text-left"
+        <SortableList
+          items={ativo?.workout_exercises ?? []}
+          onReorder={reordenarExercicios}
+          className="space-y-3"
+          renderItem={(we, handle) => (
+            <div
+              className={`surface-iron relative flex items-stretch rounded-sm border border-border transition-colors hover:border-primary/70 ${
+                we.concluido ? "opacity-50" : ""
+              }`}
             >
-              <span className="font-display text-2xl text-muted-foreground">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="truncate text-xl leading-tight">
-                    {we.exercises?.name_pt ?? "Exercício"}
-                  </h3>
-                  {we.concluido && <CheckCircle2 className="size-5 shrink-0 text-gold" />}
-                  {we.eh_bonus_foco && <Crown className="size-5 shrink-0 text-gold" />}
-                </div>
-                <p className="mt-0.5 text-sm uppercase tracking-wider text-muted-foreground">
-                  {we.exercises?.muscle}
-                </p>
+              {handle}
+              <div className="min-w-0 flex-1 py-4 pr-12">
+                <button
+                  onClick={() => setDetalhe(we)}
+                  className="block w-full text-left"
+                >
+                  <div className="flex items-center gap-2">
+                    <h3 className="truncate text-xl leading-tight">
+                      {we.exercises?.name_pt ?? "Exercício"}
+                    </h3>
+                    {we.concluido && <CheckCircle2 className="size-5 shrink-0 text-gold" />}
+                    {we.eh_bonus_foco && <Crown className="size-5 shrink-0 text-gold" />}
+                  </div>
+                  <p className="mt-0.5 text-sm uppercase tracking-wider text-muted-foreground">
+                    {we.exercises?.muscle}
+                  </p>
+                </button>
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-base font-semibold">
-                  <span>
-                    {we.series} × {we.reps_min}-{we.reps_max}
-                  </span>
+                  <SeriesRepsEditor item={we} onSave={(v) => salvarSeriesReps(we, v)} />
                   <span className="flex items-center gap-1 text-muted-foreground">
                     <Timer className="size-4" />
                     {we.descanso_segundos}s
@@ -352,17 +352,18 @@ function TreinoPage() {
                   )}
                 </div>
               </div>
-            </button>
-            <button
-              onClick={() => setExcluindoEx(we)}
-              aria-label={`Remover ${we.exercises?.name_pt ?? "exercício"}`}
-              className="absolute bottom-0 right-0 top-0 flex w-12 items-center justify-center text-muted-foreground/70 transition-colors active:text-primary"
-            >
-              <Trash2 className="size-4" />
-            </button>
-          </div>
-        ))}
+              <button
+                onClick={() => setExcluindoEx(we)}
+                aria-label={`Remover ${we.exercises?.name_pt ?? "exercício"}`}
+                className="absolute bottom-0 right-0 top-0 flex w-12 items-center justify-center text-muted-foreground/70 transition-colors active:text-primary"
+              >
+                <Trash2 className="size-4" />
+              </button>
+            </div>
+          )}
+        />
       </div>
+
 
       {!!ativo && (
         <div className="mt-8 space-y-3">
