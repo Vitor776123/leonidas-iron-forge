@@ -590,9 +590,9 @@ function DetalheDialog({
   }
   return (
     <Dialog open={!!item} onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card sm:max-w-lg">
+      <DialogContent className="max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-lg overflow-y-auto overflow-x-hidden border-border bg-card p-4 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-left font-display text-2xl uppercase">
+          <DialogTitle className="text-left font-display text-2xl uppercase leading-tight">
             {ex?.name_pt}
           </DialogTitle>
         </DialogHeader>
