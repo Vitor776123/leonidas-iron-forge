@@ -486,6 +486,12 @@ function TreinoPage() {
         }}
       />
 
+      <CardioDialog
+        item={cardio}
+        onClose={() => setCardio(null)}
+        onChanged={() => queryClient.invalidateQueries({ queryKey: ["plano"] })}
+      />
+
       <DetalheDialog
         item={detalhe}
         lista={ativo?.workout_exercises ?? []}
