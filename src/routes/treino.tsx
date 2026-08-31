@@ -325,7 +325,7 @@ function TreinoPage() {
               {handle}
               <div className="min-w-0 flex-1 py-4 pr-12">
                 <button
-                  onClick={() => setDetalhe(we)}
+                  onClick={() => (we.tipo === "cardio" ? setCardio(we) : setDetalhe(we))}
                   className="block w-full text-left"
                 >
                   <div className="flex items-center gap-2">
@@ -340,11 +340,22 @@ function TreinoPage() {
                   </p>
                 </button>
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-base font-semibold">
-                  <SeriesRepsEditor item={we} onSave={(v) => salvarSeriesReps(we, v)} />
-                  <span className="flex items-center gap-1 text-muted-foreground">
-                    <Timer className="size-4" />
-                    {we.descanso_segundos}s
-                  </span>
+                  {we.tipo === "cardio" ? (
+                    <span className="flex items-center gap-1 text-muted-foreground">
+                      <Timer className="size-4" />
+                      {we.minutos_realizados != null
+                        ? `${we.minutos_realizados} min${we.calorias_realizadas != null ? ` · ${we.calorias_realizadas} kcal` : ""}`
+                        : "Toque para registrar minutos e kcal"}
+                    </span>
+                  ) : (
+                    <>
+                      <SeriesRepsEditor item={we} onSave={(v) => salvarSeriesReps(we, v)} />
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <Timer className="size-4" />
+                        {we.descanso_segundos}s
+                      </span>
+                    </>
+                  )}
                   {we.tecnica_avancada && (
                     <span className="flex items-center gap-1 text-primary">
                       <Zap className="size-4" />
