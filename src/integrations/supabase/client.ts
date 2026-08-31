@@ -54,6 +54,9 @@ export type WorkoutExercise = {
   tecnica_avancada: string | null;
   concluido: boolean | null;
   observacao: string | null;
+  tipo: string | null;
+  minutos_realizados: number | null;
+  calorias_realizadas: number | null;
   exercises: Exercise | null;
 };
 

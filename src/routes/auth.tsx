@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Dumbbell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import helmetAsset from "@/assets/leonidas_helmet.png.asset.json";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
