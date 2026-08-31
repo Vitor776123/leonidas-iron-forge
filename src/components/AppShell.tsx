@@ -49,7 +49,7 @@ export function AppShell({
         {bottomBar}
         <nav className="border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
           <div className="mx-auto grid max-w-2xl grid-cols-3">
-            <TabLink to="/treino" icon={<Dumbbell className="size-6" />} label="Treino" />
+            <TabLink to="/treino" icon={<TrendingUp className="size-6" />} label="Treino" />
             <TabLink to="/progresso" icon={<TrendingUp className="size-6" />} label="Progresso" />
             <TabLink to="/perfil" icon={<User className="size-6" />} label="Perfil" />
           </div>
