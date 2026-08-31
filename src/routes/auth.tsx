@@ -1,8 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Dumbbell } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import helmetAsset from "@/assets/leonidas_helmet.png.asset.json";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -65,9 +65,11 @@ function AuthPage() {
     <div className="screen-in flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="mb-10 text-center">
-          <span className="mx-auto mb-5 flex size-16 items-center justify-center rounded-sm bg-primary shadow-[var(--shadow-blood)]">
-            <Dumbbell className="size-9 text-primary-foreground" strokeWidth={2.75} />
-          </span>
+          <img
+            src={helmetAsset.url}
+            alt="Elmo Leonidas"
+            className="mx-auto mb-5 size-16 object-contain"
+          />
           <h1 className="font-display text-5xl tracking-[0.18em]">LEONIDAS</h1>
           <p className="mt-2 text-sm uppercase tracking-[0.3em] text-muted-foreground">
             Treino sem desculpa

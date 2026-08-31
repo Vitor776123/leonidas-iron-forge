@@ -81,6 +81,7 @@ function TreinoPage() {
   const queryClient = useQueryClient();
   const [diaAtivo, setDiaAtivo] = useState<string | null>(null);
   const [detalhe, setDetalhe] = useState<WorkoutExercise | null>(null);
+  const [cardio, setCardio] = useState<WorkoutExercise | null>(null);
   const [trocando, setTrocando] = useState<WorkoutExercise | null>(null);
   const [finalizando, setFinalizando] = useState(false);
   const [criando, setCriando] = useState(false);
@@ -125,7 +126,7 @@ function TreinoPage() {
       const { data: dias, error } = await supabase
         .from("workout_days")
         .select(
-          "id, ordem, rotulo, workout_exercises(id, workout_day_id, exercise_id, ordem, series, reps_min, reps_max, descanso_segundos, eh_bonus_foco, tecnica_avancada, concluido, observacao, exercises(id, name_pt, muscle, body_part, equipment, gif_url, instructions_pt, dificuldade))",
+          "id, ordem, rotulo, workout_exercises(id, workout_day_id, exercise_id, ordem, series, reps_min, reps_max, descanso_segundos, eh_bonus_foco, tecnica_avancada, concluido, observacao, tipo, minutos_realizados, calorias_realizadas, exercises(id, name_pt, muscle, body_part, equipment, gif_url, instructions_pt, dificuldade))",
         )
         .eq("workout_plan_id", plan.id)
         .order("ordem");
@@ -324,7 +325,7 @@ function TreinoPage() {
               {handle}
               <div className="min-w-0 flex-1 py-4 pr-12">
                 <button
-                  onClick={() => setDetalhe(we)}
+                  onClick={() => (we.tipo === "cardio" ? setCardio(we) : setDetalhe(we))}
                   className="block w-full text-left"
                 >
                   <div className="flex items-center gap-2">
@@ -339,11 +340,22 @@ function TreinoPage() {
                   </p>
                 </button>
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-base font-semibold">
-                  <SeriesRepsEditor item={we} onSave={(v) => salvarSeriesReps(we, v)} />
-                  <span className="flex items-center gap-1 text-muted-foreground">
-                    <Timer className="size-4" />
-                    {we.descanso_segundos}s
-                  </span>
+                  {we.tipo === "cardio" ? (
+                    <span className="flex items-center gap-1 text-muted-foreground">
+                      <Timer className="size-4" />
+                      {we.minutos_realizados != null
+                        ? `${we.minutos_realizados} min${we.calorias_realizadas != null ? ` · ${we.calorias_realizadas} kcal` : ""}`
+                        : "Toque para registrar minutos e kcal"}
+                    </span>
+                  ) : (
+                    <>
+                      <SeriesRepsEditor item={we} onSave={(v) => salvarSeriesReps(we, v)} />
+                      <span className="flex items-center gap-1 text-muted-foreground">
+                        <Timer className="size-4" />
+                        {we.descanso_segundos}s
+                      </span>
+                    </>
+                  )}
                   {we.tecnica_avancada && (
                     <span className="flex items-center gap-1 text-primary">
                       <Zap className="size-4" />
@@ -472,6 +484,12 @@ function TreinoPage() {
           setAdicionarEm(null);
           queryClient.invalidateQueries({ queryKey: ["plano"] });
         }}
+      />
+
+      <CardioDialog
+        item={cardio}
+        onClose={() => setCardio(null)}
+        onChanged={() => queryClient.invalidateQueries({ queryKey: ["plano"] })}
       />
 
       <DetalheDialog
@@ -676,6 +694,102 @@ function CampoNum({
         className="h-12 rounded-sm border-2 bg-secondary text-center text-lg"
       />
     </label>
+  );
+}
+
+function CardioDialog({
+  item,
+  onClose,
+  onChanged,
+}: {
+  item: WorkoutExercise | null;
+  onClose: () => void;
+  onChanged: () => void;
+}) {
+  const [minutos, setMinutos] = useState("");
+  const [kcal, setKcal] = useState("");
+  const [salvando, setSalvando] = useState(false);
+
+  useEffect(() => {
+    setMinutos(item?.minutos_realizados != null ? String(item.minutos_realizados) : "");
+    setKcal(item?.calorias_realizadas != null ? String(item.calorias_realizadas) : "");
+  }, [item?.id, item?.minutos_realizados, item?.calorias_realizadas]);
+
+  async function salvar() {
+    if (!item) return;
+    const m = minutos.trim() ? Number(minutos) : null;
+    const c = kcal.trim() ? Number(kcal) : null;
+    if ((m !== null && (!Number.isFinite(m) || m < 0)) || (c !== null && (!Number.isFinite(c) || c < 0))) {
+      toast.error("Valores inválidos");
+      return;
+    }
+    setSalvando(true);
+    const { error } = await supabase
+      .from("workout_exercises")
+      .update({ minutos_realizados: m, calorias_realizadas: c })
+      .eq("id", item.id);
+    setSalvando(false);
+    if (error) {
+      toast.error("Falha ao salvar cardio");
+      return;
+    }
+    toast.success("Cardio registrado");
+    onChanged();
+    onClose();
+  }
+
+  return (
+    <Dialog open={!!item} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent
+        key={item?.id}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className="max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-sm overflow-y-auto overflow-x-hidden border-border bg-card p-5"
+      >
+        <DialogHeader>
+          <DialogTitle className="text-left font-display text-2xl uppercase leading-tight">
+            {item?.exercises?.name_pt ?? "Cardio"}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <label className="block space-y-1.5">
+            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Quantos minutos você fez?
+            </span>
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              value={minutos}
+              onChange={(e) => setMinutos(e.target.value)}
+              placeholder="Ex: 20"
+              className="h-12 rounded-sm border-2 bg-secondary text-center text-lg"
+            />
+          </label>
+          <label className="block space-y-1.5">
+            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Quantas calorias (kcal)?
+            </span>
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              value={kcal}
+              onChange={(e) => setKcal(e.target.value)}
+              placeholder="Ex: 180"
+              className="h-12 rounded-sm border-2 bg-secondary text-center text-lg"
+            />
+          </label>
+          <Button
+            onClick={salvar}
+            disabled={salvando}
+            className="h-12 w-full font-display tracking-widest"
+          >
+            {salvando ? "SALVANDO..." : "SALVAR"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
