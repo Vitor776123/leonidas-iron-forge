@@ -697,6 +697,102 @@ function CampoNum({
   );
 }
 
+function CardioDialog({
+  item,
+  onClose,
+  onChanged,
+}: {
+  item: WorkoutExercise | null;
+  onClose: () => void;
+  onChanged: () => void;
+}) {
+  const [minutos, setMinutos] = useState("");
+  const [kcal, setKcal] = useState("");
+  const [salvando, setSalvando] = useState(false);
+
+  useEffect(() => {
+    setMinutos(item?.minutos_realizados != null ? String(item.minutos_realizados) : "");
+    setKcal(item?.calorias_realizadas != null ? String(item.calorias_realizadas) : "");
+  }, [item?.id, item?.minutos_realizados, item?.calorias_realizadas]);
+
+  async function salvar() {
+    if (!item) return;
+    const m = minutos.trim() ? Number(minutos) : null;
+    const c = kcal.trim() ? Number(kcal) : null;
+    if ((m !== null && (!Number.isFinite(m) || m < 0)) || (c !== null && (!Number.isFinite(c) || c < 0))) {
+      toast.error("Valores inválidos");
+      return;
+    }
+    setSalvando(true);
+    const { error } = await supabase
+      .from("workout_exercises")
+      .update({ minutos_realizados: m, calorias_realizadas: c })
+      .eq("id", item.id);
+    setSalvando(false);
+    if (error) {
+      toast.error("Falha ao salvar cardio");
+      return;
+    }
+    toast.success("Cardio registrado");
+    onChanged();
+    onClose();
+  }
+
+  return (
+    <Dialog open={!!item} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent
+        key={item?.id}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+        className="max-h-[92vh] w-[calc(100vw-1.5rem)] max-w-sm overflow-y-auto overflow-x-hidden border-border bg-card p-5"
+      >
+        <DialogHeader>
+          <DialogTitle className="text-left font-display text-2xl uppercase leading-tight">
+            {item?.exercises?.name_pt ?? "Cardio"}
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <label className="block space-y-1.5">
+            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Quantos minutos você fez?
+            </span>
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              value={minutos}
+              onChange={(e) => setMinutos(e.target.value)}
+              placeholder="Ex: 20"
+              className="h-12 rounded-sm border-2 bg-secondary text-center text-lg"
+            />
+          </label>
+          <label className="block space-y-1.5">
+            <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Quantas calorias (kcal)?
+            </span>
+            <Input
+              type="number"
+              inputMode="numeric"
+              min={0}
+              value={kcal}
+              onChange={(e) => setKcal(e.target.value)}
+              placeholder="Ex: 180"
+              className="h-12 rounded-sm border-2 bg-secondary text-center text-lg"
+            />
+          </label>
+          <Button
+            onClick={salvar}
+            disabled={salvando}
+            className="h-12 w-full font-display tracking-widest"
+          >
+            {salvando ? "SALVANDO..." : "SALVAR"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function DetalheDialog({
   item,
   lista,
