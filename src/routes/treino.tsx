@@ -889,10 +889,14 @@ function DetalheDialog({
           />
         )}
         <div className="flex flex-wrap gap-x-5 gap-y-1 text-base font-semibold">
-          <span>
-            {item?.series} × {item?.reps_min}-{item?.reps_max}
-          </span>
-          <span className="text-muted-foreground">{item?.descanso_segundos}s descanso</span>
+          {item?.tipo !== "cardio" && (
+            <>
+              <span>
+                {item?.series} × {item?.reps_min}-{item?.reps_max}
+              </span>
+              <span className="text-muted-foreground">{item?.descanso_segundos}s descanso</span>
+            </>
+          )}
           {item?.tecnica_avancada && (
             <span className="text-primary">{item.tecnica_avancada}</span>
           )}
