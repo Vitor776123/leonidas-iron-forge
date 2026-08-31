@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Dumbbell, LogOut, TrendingUp, User } from "lucide-react";
+import { LogOut, TrendingUp, User } from "lucide-react";
+import helmetAsset from "@/assets/leonidas_helmet.png.asset.json";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
