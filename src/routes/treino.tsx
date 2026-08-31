@@ -325,7 +325,7 @@ function TreinoPage() {
               {handle}
               <div className="min-w-0 flex-1 py-4 pr-12">
                 <button
-                  onClick={() => (we.tipo === "cardio" ? setCardio(we) : setDetalhe(we))}
+                  onClick={() => setDetalhe(we)}
                   className="block w-full text-left"
                 >
                   <div className="flex items-center gap-2">
@@ -341,12 +341,19 @@ function TreinoPage() {
                 </button>
                 <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-base font-semibold">
                   {we.tipo === "cardio" ? (
-                    <span className="flex items-center gap-1 text-muted-foreground">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCardio(we);
+                      }}
+                      className="flex min-h-[44px] items-center gap-1 rounded-sm px-2 text-muted-foreground active:bg-secondary"
+                    >
                       <Timer className="size-4" />
                       {we.minutos_realizados != null
                         ? `${we.minutos_realizados} min${we.calorias_realizadas != null ? ` · ${we.calorias_realizadas} kcal` : ""}`
                         : "Toque para registrar minutos e kcal"}
-                    </span>
+                    </button>
                   ) : (
                     <>
                       <SeriesRepsEditor item={we} onSave={(v) => salvarSeriesReps(we, v)} />
