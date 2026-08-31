@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Dumbbell, LogOut, TrendingUp, User } from "lucide-react";
+import helmetAsset from "@/assets/leonidas_helmet.png.asset.json";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -25,9 +26,11 @@ export function AppShell({
         <div className="mx-auto grid max-w-2xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 px-4 py-2">
           {headerLeft ?? <span />}
           <Link to="/treino" className="flex min-w-0 items-center gap-2">
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-sm bg-primary">
-              <Dumbbell className="size-5 text-primary-foreground" strokeWidth={2.75} />
-            </span>
+            <img
+              src={helmetAsset.url}
+              alt="Leonidas"
+              className="size-9 shrink-0 object-contain"
+            />
             <span className="truncate font-display text-xl tracking-[0.2em]">LEONIDAS</span>
           </Link>
           <button
