@@ -145,6 +145,20 @@ function ProgressoPage() {
     },
   });
 
+  const { data: resumoPerfil } = useQuery({
+    queryKey: ["perfil-resumo", profileId],
+    enabled: !!profileId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_perfil_resumo", {
+        p_profile_id: profileId,
+      });
+      if (error) throw error;
+      return data as unknown as PerfilResumo;
+    },
+  });
+
+  const ultimoTreino = resumoPerfil?.ultimo_treino;
+
   const diasComTreino = useMemo(
     () => new Map((overview?.calendario ?? []).map((d) => [d.data, d.treinos])),
     [overview],
