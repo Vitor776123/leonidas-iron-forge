@@ -45,6 +45,22 @@ function PerfilPage() {
     },
   });
 
+  const { data: resumo } = useQuery({
+    queryKey: ["perfil-resumo", profile?.id],
+    enabled: !!profile?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_perfil_resumo", {
+        p_profile_id: profile!.id,
+      });
+      if (error) throw error;
+      return data as unknown as {
+        ultimo_treino?: { rotulo: string | null; completed_at: string } | null;
+      };
+    },
+  });
+
+  const ultimo = resumo?.ultimo_treino;
+
   return (
     <AppShell>
       <h1 className="text-4xl">Perfil</h1>
