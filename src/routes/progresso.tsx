@@ -245,6 +245,23 @@ function ProgressoPage() {
                 Nenhum treino registrado neste período.
               </p>
             )}
+            <div className="mt-4 border-t border-border pt-3">
+              <p className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+                Último treino finalizado
+              </p>
+              {ultimoTreino?.completed_at ? (
+                <p className="mt-1 font-display text-lg uppercase tracking-wide">
+                  {ultimoTreino.rotulo ?? "Treino"}{" "}
+                  <span className="text-gold">
+                    — {dataAmigavel(ultimoTreino.completed_at)}
+                  </span>
+                </p>
+              ) : (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Nenhum treino finalizado ainda.
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Distribuição muscular */}
