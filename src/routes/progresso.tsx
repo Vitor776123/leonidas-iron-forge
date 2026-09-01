@@ -39,6 +39,8 @@ type Overview = {
   sequencia_atual_dias: number;
   distribuicao_muscular: Distribuicao[];
   calendario: DiaCalendario[];
+  calorias_queimadas_cardio?: number | null;
+  minutos_cardio_total?: number | null;
 };
 
 type Observacao = {
