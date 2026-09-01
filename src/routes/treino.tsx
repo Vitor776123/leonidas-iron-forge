@@ -1180,7 +1180,7 @@ function ExercisePicker({
     queryFn: async () => {
       let q = supabase
         .from("exercises")
-        .select("id, name_pt, muscle, body_part, equipment, gif_url, instructions_pt, dificuldade")
+        .select("id, name_pt, muscle, body_part, equipment, gif_url, instructions_pt, dificuldade, category")
         .order("name_pt")
         .limit(60);
       if (busca.trim()) q = q.ilike("name_pt", `%${busca.trim()}%`);
@@ -1203,12 +1203,20 @@ function ExercisePicker({
         .from("workout_exercises")
         .select("id", { count: "exact", head: true })
         .eq("workout_day_id", dia.id);
+      const ehCardio = (ex as Exercise & { category?: string | null }).category === "cardio";
       const { error } = await supabase.from("workout_exercises").insert({
         workout_day_id: dia.id,
         exercise_id: ex.id,
         ordem: (count ?? 0) + 1,
-        ...PADRAO,
         eh_bonus_foco: false,
+        ...(ehCardio
+          ? {
+              tipo: "cardio",
+              duracao_minutos_min: 15,
+              duracao_minutos_max: 20,
+              descanso_segundos: 0,
+            }
+          : { tipo: "forca", ...PADRAO }),
       });
       if (error) throw error;
       setAdicionados((n) => n + 1);

@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Dumbbell, Flame, StickyNote, TrendingDown, TrendingUp, Minus } from "lucide-react";
+import { Dumbbell, Flame, StickyNote, Timer, TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { AppShell } from "@/components/AppShell";
@@ -39,6 +39,8 @@ type Overview = {
   sequencia_atual_dias: number;
   distribuicao_muscular: Distribuicao[];
   calendario: DiaCalendario[];
+  calorias_queimadas_cardio?: number | null;
+  minutos_cardio_total?: number | null;
 };
 
 type Observacao = {
@@ -258,6 +260,31 @@ function ProgressoPage() {
                 Sem dados de distribuição neste período.
               </p>
             )}
+          </div>
+
+          {/* Cardio */}
+          <div className="surface-iron rounded-sm border border-border p-5">
+            <h2 className="text-xl">Cardio</h2>
+            <div className="mt-4 grid grid-cols-2 gap-3">
+              <div className="rounded-sm border border-border bg-card p-4 text-center">
+                <Flame className="mx-auto size-6 text-primary" strokeWidth={2.5} />
+                <p className="mt-2 font-display text-4xl leading-none text-gradient-gold">
+                  {overview.calorias_queimadas_cardio ?? 0}
+                </p>
+                <p className="mt-2 text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+                  kcal queimadas
+                </p>
+              </div>
+              <div className="rounded-sm border border-border bg-card p-4 text-center">
+                <Timer className="mx-auto size-6 text-gold" strokeWidth={2.5} />
+                <p className="mt-2 font-display text-4xl leading-none text-foreground">
+                  {overview.minutos_cardio_total ?? 0}
+                </p>
+                <p className="mt-2 text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+                  minutos de cardio
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Observações de treino */}
