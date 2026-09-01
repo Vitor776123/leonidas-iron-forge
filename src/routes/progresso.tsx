@@ -1,7 +1,19 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { Dumbbell, Flame, StickyNote, Timer, TrendingDown, TrendingUp, Minus } from "lucide-react";
+import { Dumbbell, Flame, Scale, StickyNote, Timer, TrendingDown, TrendingUp, Minus } from "lucide-react";
+import { toast } from "sonner";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { AppShell } from "@/components/AppShell";
@@ -287,6 +299,9 @@ function ProgressoPage() {
             </div>
           </div>
 
+          {/* Peso corporal */}
+          <PesoCard profileId={profileId!} />
+
           {/* Observações de treino */}
           <div className="surface-iron rounded-sm border border-border p-5">
             <h2 className="flex items-center gap-2 text-xl">
@@ -322,5 +337,147 @@ function ProgressoPage() {
         </div>
       )}
     </AppShell>
+  );
+}
+
+type PerfilResumo = {
+  ultima_pesagem?: {
+    peso_kg: number;
+    registrado_em: string;
+    dias_desde_ultima: number | null;
+  } | null;
+  historico_peso?: { peso_kg: number; registrado_em: string }[] | null;
+};
+
+function PesoCard({ profileId }: { profileId: string }) {
+  const qc = useQueryClient();
+  const [peso, setPeso] = useState("");
+
+  const { data: resumo } = useQuery({
+    queryKey: ["perfil-resumo", profileId],
+    enabled: !!profileId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_perfil_resumo", {
+        p_profile_id: profileId,
+      });
+      if (error) throw error;
+      return data as unknown as PerfilResumo;
+    },
+  });
+
+  const salvar = useMutation({
+    mutationFn: async (valor: number) => {
+      const { error } = await supabase
+        .from("peso_registros")
+        .insert({ profile_id: profileId, peso_kg: valor });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setPeso("");
+      toast.success("Peso registrado");
+      qc.invalidateQueries({ queryKey: ["perfil-resumo", profileId] });
+    },
+    onError: () => toast.error("Não foi possível registrar o peso"),
+  });
+
+  const pontos = useMemo(
+    () =>
+      [...(resumo?.historico_peso ?? [])]
+        .map((p) => ({ t: new Date(p.registrado_em).getTime(), peso: Number(p.peso_kg) }))
+        .sort((a, b) => a.t - b.t),
+    [resumo],
+  );
+
+  const ultima = resumo?.ultima_pesagem;
+
+  function enviar() {
+    const valor = Number(peso.replace(",", "."));
+    if (!valor || valor <= 0) {
+      toast.error("Informe um peso válido");
+      return;
+    }
+    salvar.mutate(valor);
+  }
+
+  return (
+    <div className="surface-iron rounded-sm border border-border p-5">
+      <h2 className="flex items-center gap-2 text-xl">
+        <Scale className="size-5 text-gold" /> Peso corporal
+      </h2>
+
+      <div className="mt-4 flex gap-2">
+        <Input
+          type="number"
+          inputMode="decimal"
+          step="0.1"
+          placeholder="78.5"
+          value={peso}
+          onChange={(e) => setPeso(e.target.value)}
+          className="h-12 text-lg"
+        />
+        <Button
+          onClick={enviar}
+          disabled={salvar.isPending}
+          className="h-12 shrink-0 font-display tracking-widest"
+        >
+          SALVAR
+        </Button>
+      </div>
+
+      {ultima ? (
+        <p className="mt-3 text-sm text-muted-foreground">
+          Última pesagem:{" "}
+          <span className="font-display text-lg text-gold">{ultima.peso_kg} kg</span>{" "}
+          — {dataAmigavel(ultima.registrado_em)}
+        </p>
+      ) : (
+        <p className="mt-3 text-sm text-muted-foreground">Nenhuma pesagem registrada.</p>
+      )}
+
+      {pontos.length > 1 && (
+        <div className="mt-5 h-52 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={pontos} margin={{ top: 5, right: 8, bottom: 0, left: -18 }}>
+              <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" />
+              <XAxis
+                dataKey="t"
+                type="number"
+                scale="time"
+                domain={["dataMin", "dataMax"]}
+                tickFormatter={(v: number) =>
+                  new Date(v).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
+                }
+                tick={{ fontSize: 11 }}
+                stroke="currentColor"
+                className="text-muted-foreground"
+              />
+              <YAxis
+                domain={["dataMin - 1", "dataMax + 1"]}
+                tick={{ fontSize: 11 }}
+                stroke="currentColor"
+                className="text-muted-foreground"
+              />
+              <Tooltip
+                labelFormatter={(v) => new Date(Number(v)).toLocaleDateString("pt-BR")}
+                formatter={(v) => [`${v} kg`, "Peso"]}
+                contentStyle={{
+                  background: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--border))",
+                  borderRadius: 4,
+                  fontSize: 12,
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="peso"
+                stroke="hsl(var(--primary))"
+                strokeWidth={2.5}
+                dot={{ r: 3, fill: "hsl(var(--primary))" }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
+    </div>
   );
 }

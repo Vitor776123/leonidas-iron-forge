@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { RefreshCw } from "lucide-react";
+import { CalendarCheck, RefreshCw } from "lucide-react";
 import { supabase, type Profile } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { AppShell } from "@/components/AppShell";
@@ -45,6 +45,22 @@ function PerfilPage() {
     },
   });
 
+  const { data: resumo } = useQuery({
+    queryKey: ["perfil-resumo", profile?.id],
+    enabled: !!profile?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_perfil_resumo", {
+        p_profile_id: profile!.id,
+      });
+      if (error) throw error;
+      return data as unknown as {
+        ultimo_treino?: { rotulo: string | null; completed_at: string } | null;
+      };
+    },
+  });
+
+  const ultimo = resumo?.ultimo_treino;
+
   return (
     <AppShell>
       <h1 className="text-4xl">Perfil</h1>
@@ -71,6 +87,22 @@ function PerfilPage() {
           />
         </div>
       )}
+
+      <div className="surface-iron mt-6 rounded-sm border border-border p-5">
+        <h2 className="flex items-center gap-2 text-xl">
+          <CalendarCheck className="size-5 text-gold" /> Último treino finalizado
+        </h2>
+        {ultimo?.completed_at ? (
+          <p className="mt-3 font-display text-lg uppercase tracking-wide">
+            {ultimo.rotulo ?? "Treino"}{" "}
+            <span className="text-gold">— {dataAmigavel(ultimo.completed_at)}</span>
+          </p>
+        ) : (
+          <p className="mt-3 text-sm text-muted-foreground">
+            Nenhum treino finalizado ainda.
+          </p>
+        )}
+      </div>
 
       <div className="surface-iron mt-10 rounded-sm border border-border p-6">
         <h2 className="text-2xl">Refazer questionário</h2>
@@ -125,4 +157,15 @@ const ROTULOS: Record<string, string> = {
 function rotulo(v: string | null | undefined) {
   if (!v) return "—";
   return ROTULOS[v] ?? v;
+}
+
+function dataAmigavel(iso: string) {
+  const d = new Date(iso);
+  const agora = new Date();
+  const inicio = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const dias = Math.round((inicio(agora) - inicio(d)) / 86400000);
+  if (dias <= 0) return "hoje";
+  if (dias === 1) return "ontem";
+  if (dias < 30) return `há ${dias} dias`;
+  return d.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
 }

@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Dumbbell, LogOut, TrendingUp, User } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import helmetAsset from "@/assets/leonidas_helmet.png.asset.json";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export function AppShell({
   children,
@@ -14,6 +16,21 @@ export function AppShell({
   headerLeft?: ReactNode;
 }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const { data: nome } = useQuery({
+    queryKey: ["header-nome", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("nome")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return (data?.nome as string | null) ?? null;
+    },
+  });
 
   async function signOut() {
     await supabase.auth.signOut();
@@ -31,7 +48,9 @@ export function AppShell({
               alt="Leonidas"
               className="size-9 shrink-0 object-contain"
             />
-            <span className="truncate font-display text-xl tracking-[0.2em]">LEONIDAS</span>
+            <span className="truncate font-display text-xl uppercase tracking-[0.2em]">
+              {nome || "LEONIDAS"}
+            </span>
           </Link>
           <button
             onClick={signOut}
