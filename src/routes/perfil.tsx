@@ -158,3 +158,14 @@ function rotulo(v: string | null | undefined) {
   if (!v) return "—";
   return ROTULOS[v] ?? v;
 }
+
+function dataAmigavel(iso: string) {
+  const d = new Date(iso);
+  const agora = new Date();
+  const inicio = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const dias = Math.round((inicio(agora) - inicio(d)) / 86400000);
+  if (dias <= 0) return "hoje";
+  if (dias === 1) return "ontem";
+  if (dias < 30) return `há ${dias} dias`;
+  return d.toLocaleDateString("pt-BR", { day: "numeric", month: "short" });
+}
