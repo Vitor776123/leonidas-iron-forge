@@ -372,6 +372,7 @@ function ProgressoPage() {
 }
 
 type PerfilResumo = {
+  ultimo_treino?: { rotulo: string | null; completed_at: string } | null;
   ultima_pesagem?: {
     peso_kg: number;
     registrado_em: string;
