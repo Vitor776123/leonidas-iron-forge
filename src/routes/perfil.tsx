@@ -88,6 +88,22 @@ function PerfilPage() {
         </div>
       )}
 
+      <div className="surface-iron mt-6 rounded-sm border border-border p-5">
+        <h2 className="flex items-center gap-2 text-xl">
+          <CalendarCheck className="size-5 text-gold" /> Último treino finalizado
+        </h2>
+        {ultimo?.completed_at ? (
+          <p className="mt-3 font-display text-lg uppercase tracking-wide">
+            {ultimo.rotulo ?? "Treino"}{" "}
+            <span className="text-gold">— {dataAmigavel(ultimo.completed_at)}</span>
+          </p>
+        ) : (
+          <p className="mt-3 text-sm text-muted-foreground">
+            Nenhum treino finalizado ainda.
+          </p>
+        )}
+      </div>
+
       <div className="surface-iron mt-10 rounded-sm border border-border p-6">
         <h2 className="text-2xl">Refazer questionário</h2>
         <p className="mt-2 text-sm text-muted-foreground">
