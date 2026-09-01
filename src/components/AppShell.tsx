@@ -16,6 +16,21 @@ export function AppShell({
   headerLeft?: ReactNode;
 }) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const { data: nome } = useQuery({
+    queryKey: ["header-nome", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("nome")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (error) throw error;
+      return (data?.nome as string | null) ?? null;
+    },
+  });
 
   async function signOut() {
     await supabase.auth.signOut();
