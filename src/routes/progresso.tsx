@@ -145,6 +145,20 @@ function ProgressoPage() {
     },
   });
 
+  const { data: resumoPerfil } = useQuery({
+    queryKey: ["perfil-resumo", profileId],
+    enabled: !!profileId,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("get_perfil_resumo", {
+        p_profile_id: profileId,
+      });
+      if (error) throw error;
+      return data as unknown as PerfilResumo;
+    },
+  });
+
+  const ultimoTreino = resumoPerfil?.ultimo_treino;
+
   const diasComTreino = useMemo(
     () => new Map((overview?.calendario ?? []).map((d) => [d.data, d.treinos])),
     [overview],
@@ -245,6 +259,23 @@ function ProgressoPage() {
                 Nenhum treino registrado neste período.
               </p>
             )}
+            <div className="mt-4 border-t border-border pt-3">
+              <p className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+                Último treino finalizado
+              </p>
+              {ultimoTreino?.completed_at ? (
+                <p className="mt-1 font-display text-lg uppercase tracking-wide">
+                  {ultimoTreino.rotulo ?? "Treino"}{" "}
+                  <span className="text-gold">
+                    — {dataAmigavel(ultimoTreino.completed_at)}
+                  </span>
+                </p>
+              ) : (
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Nenhum treino finalizado ainda.
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Distribuição muscular */}
@@ -341,6 +372,7 @@ function ProgressoPage() {
 }
 
 type PerfilResumo = {
+  ultimo_treino?: { rotulo: string | null; completed_at: string } | null;
   ultima_pesagem?: {
     peso_kg: number;
     registrado_em: string;
