@@ -287,6 +287,9 @@ function ProgressoPage() {
             </div>
           </div>
 
+          {/* Peso corporal */}
+          <PesoCard profileId={profileId!} />
+
           {/* Observações de treino */}
           <div className="surface-iron rounded-sm border border-border p-5">
             <h2 className="flex items-center gap-2 text-xl">
