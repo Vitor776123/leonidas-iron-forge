@@ -48,7 +48,9 @@ export function AppShell({
               alt="Leonidas"
               className="size-9 shrink-0 object-contain"
             />
-            <span className="truncate font-display text-xl tracking-[0.2em]">LEONIDAS</span>
+            <span className="truncate font-display text-xl uppercase tracking-[0.2em]">
+              {nome || "LEONIDAS"}
+            </span>
           </Link>
           <button
             onClick={signOut}
