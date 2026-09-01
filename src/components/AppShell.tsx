@@ -1,8 +1,10 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Dumbbell, LogOut, TrendingUp, User } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import helmetAsset from "@/assets/leonidas_helmet.png.asset.json";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 export function AppShell({
   children,
