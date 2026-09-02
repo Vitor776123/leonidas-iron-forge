@@ -432,50 +432,48 @@ function PesoCard({ profileId }: { profileId: string }) {
         <p className="mt-3 text-sm text-muted-foreground">Nenhuma pesagem registrada.</p>
       )}
 
-      {pontos.length > 1 && (
-        <div className="mt-5 h-52 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={pontos} margin={{ top: 5, right: 8, bottom: 0, left: -18 }}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" />
-              <XAxis
-                dataKey="t"
-                type="number"
-                scale="time"
-                domain={["dataMin", "dataMax"]}
-                tickFormatter={(v: number) =>
-                  new Date(v).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
-                }
-                tick={{ fontSize: 11 }}
-                stroke="currentColor"
-                className="text-muted-foreground"
-              />
-              <YAxis
-                domain={["dataMin - 1", "dataMax + 1"]}
-                tick={{ fontSize: 11 }}
-                stroke="currentColor"
-                className="text-muted-foreground"
-              />
-              <Tooltip
-                labelFormatter={(v) => new Date(Number(v)).toLocaleDateString("pt-BR")}
-                formatter={(v) => [`${v} kg`, "Peso"]}
-                contentStyle={{
-                  background: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: 4,
-                  fontSize: 12,
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="peso"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2.5}
-                dot={{ r: 3, fill: "hsl(var(--primary))" }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+      {pontos.length > 0 && (
+        <div className="mt-5 -mx-1 overflow-x-auto pb-1">
+          <div
+            className="flex items-end gap-3 px-1"
+            style={{ minWidth: `${pontos.length * 48}px` }}
+          >
+            {pontos.map((p) => {
+              const min = Math.min(...pontos.map((x) => x.peso));
+              const max = Math.max(...pontos.map((x) => x.peso));
+              const span = max - min || 1;
+              const altura = 24 + ((p.peso - min) / span) * 116;
+              const distintos = [...new Set(pontos.map((x) => x.peso))].sort((a, b) => b - a);
+              const cor =
+                p.peso === distintos[0] && distintos.length > 1
+                  ? "bg-primary"
+                  : p.peso === distintos[1]
+                    ? "bg-gold"
+                    : p.peso === distintos[distintos.length - 1]
+                      ? "bg-emerald-500"
+                      : "bg-muted-foreground/40";
+              return (
+                <div key={p.t} className="flex w-10 shrink-0 flex-col items-center">
+                  <span className="mb-1 font-display text-xs text-foreground">
+                    {p.peso}
+                  </span>
+                  <div
+                    className={`w-3 rounded-sm ${cor} transition-[height] duration-500`}
+                    style={{ height: `${altura}px` }}
+                  />
+                  <span className="mt-1.5 text-[0.6rem] text-muted-foreground">
+                    {new Date(p.t).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                    })}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
+
     </div>
   );
 }
