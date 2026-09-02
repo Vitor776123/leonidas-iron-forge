@@ -464,3 +464,177 @@ function PesoCard({ profileId }: { profileId: string }) {
     </div>
   );
 }
+
+const DIAS_SEMANA = ["D", "S", "T", "Q", "Q", "S", "S"];
+
+function iso(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function ConstanciaCard({
+  periodo,
+  calendario,
+  ultimoTreino,
+}: {
+  periodo: Periodo;
+  calendario: DiaCalendario[];
+  ultimoTreino: { rotulo: string | null; completed_at: string } | null;
+}) {
+  const mapa = useMemo(
+    () => new Map(calendario.map((d) => [d.data, d.treinos])),
+    [calendario],
+  );
+
+  const hoje = new Date();
+
+  const dias = useMemo(() => {
+    if (periodo === "semana") {
+      const base = new Date(hoje);
+      base.setDate(base.getDate() - base.getDay());
+      return Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(base);
+        d.setDate(base.getDate() + i);
+        return d;
+      });
+    }
+    if (periodo === "mes") {
+      const total = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+      return Array.from(
+        { length: total },
+        (_, i) => new Date(hoje.getFullYear(), hoje.getMonth(), i + 1),
+      );
+    }
+    return [];
+  }, [periodo, hoje.getTime()]);
+
+  const semanas = useMemo(() => {
+    if (periodo === "semana" || periodo === "mes") return [];
+    const qtd = periodo === "trimestre" ? 13 : periodo === "semestre" ? 26 : 52;
+    const fim = new Date(hoje);
+    fim.setDate(fim.getDate() - fim.getDay()); // domingo desta semana
+    return Array.from({ length: qtd }, (_, i) => {
+      const inicio = new Date(fim);
+      inicio.setDate(fim.getDate() - (qtd - 1 - i) * 7);
+      let treinos = 0;
+      for (let k = 0; k < 7; k++) {
+        const d = new Date(inicio);
+        d.setDate(inicio.getDate() + k);
+        treinos += mapa.get(iso(d)) ?? 0;
+      }
+      return { inicio, treinos };
+    });
+  }, [periodo, mapa, hoje.getTime()]);
+
+  const percentual = useMemo(() => {
+    if (dias.length) {
+      const treinados = dias.filter((d) => (mapa.get(iso(d)) ?? 0) > 0).length;
+      return Math.round((treinados / dias.length) * 100);
+    }
+    if (semanas.length) {
+      const ativas = semanas.filter((s) => s.treinos > 0).length;
+      return Math.round((ativas / semanas.length) * 100);
+    }
+    return 0;
+  }, [dias, semanas, mapa]);
+
+  const maxSemana = Math.max(1, ...semanas.map((s) => s.treinos));
+
+  return (
+    <div className="surface-iron rounded-sm border border-border p-5">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="text-xl">Constância</h2>
+        <span className="font-display text-2xl text-gradient-gold">{percentual}%</span>
+      </div>
+      <p className="mt-0.5 text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+        {dias.length ? "dias treinados no período" : "semanas com treino no período"}
+      </p>
+
+      {periodo === "semana" && (
+        <div className="mt-4 grid grid-cols-7 gap-1.5">
+          {dias.map((d, i) => {
+            const treinou = (mapa.get(iso(d)) ?? 0) > 0;
+            return (
+              <div key={i} className="flex flex-col items-center gap-1">
+                <span className="text-[0.6rem] uppercase text-muted-foreground">
+                  {DIAS_SEMANA[i]}
+                </span>
+                <div
+                  title={`${iso(d)}`}
+                  className={`flex aspect-square w-full items-center justify-center rounded-sm text-[0.65rem] ${
+                    treinou
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary/40 text-muted-foreground/50"
+                  }`}
+                >
+                  {d.getDate()}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {periodo === "mes" && (
+        <div className="mt-4 grid grid-cols-7 gap-1.5">
+          {dias.map((d, i) => {
+            const t = mapa.get(iso(d)) ?? 0;
+            const op = t === 0 ? 0 : t === 1 ? 0.55 : t === 2 ? 0.8 : 1;
+            return (
+              <div
+                key={i}
+                title={`${iso(d)} — ${t} treino(s)`}
+                className={`flex aspect-square items-center justify-center rounded-sm text-[0.6rem] ${
+                  t > 0 ? "text-primary-foreground" : "bg-secondary/40 text-muted-foreground/40"
+                }`}
+                style={t > 0 ? { backgroundColor: `hsl(var(--primary) / ${op})` } : undefined}
+              >
+                {d.getDate()}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {semanas.length > 0 && (
+        <div className="mt-4 overflow-x-auto pb-1">
+          <div
+            className="grid grid-flow-col grid-rows-2 gap-1.5"
+            style={{ minWidth: `${Math.ceil(semanas.length / 2) * 26}px` }}
+          >
+            {semanas.map((s, i) => {
+              const op = s.treinos === 0 ? 0 : 0.35 + (s.treinos / maxSemana) * 0.65;
+              return (
+                <div
+                  key={i}
+                  title={`Semana de ${s.inicio.toLocaleDateString("pt-BR")} — ${s.treinos} treino(s)`}
+                  className={`aspect-square rounded-sm ${s.treinos === 0 ? "bg-secondary/40" : ""}`}
+                  style={
+                    s.treinos > 0
+                      ? { backgroundColor: `hsl(var(--primary) / ${op})` }
+                      : undefined
+                  }
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-4 border-t border-border pt-3">
+        <p className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+          Último treino finalizado
+        </p>
+        {ultimoTreino?.completed_at ? (
+          <p className="mt-1 font-display text-lg uppercase tracking-wide">
+            {ultimoTreino.rotulo ?? "Treino"}{" "}
+            <span className="text-gold">— {dataAmigavel(ultimoTreino.completed_at)}</span>
+          </p>
+        ) : (
+          <p className="mt-1 text-sm text-muted-foreground">
+            Nenhum treino finalizado ainda.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
