@@ -3,15 +3,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { Dumbbell, Flame, Scale, StickyNote, Timer, TrendingDown, TrendingUp, Minus } from "lucide-react";
 import { toast } from "sonner";
-import {
-  CartesianGrid,
-  Line,
-  LineChart,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -159,10 +150,6 @@ function ProgressoPage() {
 
   const ultimoTreino = resumoPerfil?.ultimo_treino;
 
-  const diasComTreino = useMemo(
-    () => new Map((overview?.calendario ?? []).map((d) => [d.data, d.treinos])),
-    [overview],
-  );
 
   const diff =
     (overview?.total_treinos ?? 0) - (overview?.total_treinos_periodo_anterior ?? 0);
@@ -236,47 +223,13 @@ function ProgressoPage() {
             </div>
           </div>
 
-          {/* Calendário de constância */}
-          <div className="surface-iron rounded-sm border border-border p-5">
-            <h2 className="text-xl">Constância</h2>
-            <div className="mt-4 grid grid-cols-7 gap-1.5">
-              {(overview.calendario ?? []).map((d) => (
-                <div
-                  key={d.data}
-                  title={`${d.data} — ${d.treinos} treino(s)`}
-                  className={`flex aspect-square items-center justify-center rounded-sm text-[0.6rem] ${
-                    d.treinos > 0
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary/40 text-muted-foreground/40"
-                  }`}
-                >
-                  {new Date(d.data + "T12:00:00").getDate()}
-                </div>
-              ))}
-            </div>
-            {diasComTreino.size === 0 && (
-              <p className="mt-3 text-xs text-muted-foreground">
-                Nenhum treino registrado neste período.
-              </p>
-            )}
-            <div className="mt-4 border-t border-border pt-3">
-              <p className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
-                Último treino finalizado
-              </p>
-              {ultimoTreino?.completed_at ? (
-                <p className="mt-1 font-display text-lg uppercase tracking-wide">
-                  {ultimoTreino.rotulo ?? "Treino"}{" "}
-                  <span className="text-gold">
-                    — {dataAmigavel(ultimoTreino.completed_at)}
-                  </span>
-                </p>
-              ) : (
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Nenhum treino finalizado ainda.
-                </p>
-              )}
-            </div>
-          </div>
+          {/* Constância */}
+          <ConstanciaCard
+            periodo={periodo}
+            calendario={overview.calendario ?? []}
+            ultimoTreino={ultimoTreino ?? null}
+          />
+
 
           {/* Distribuição muscular */}
           <div className="surface-iron rounded-sm border border-border p-5">
@@ -466,50 +419,222 @@ function PesoCard({ profileId }: { profileId: string }) {
         <p className="mt-3 text-sm text-muted-foreground">Nenhuma pesagem registrada.</p>
       )}
 
-      {pontos.length > 1 && (
-        <div className="mt-5 h-52 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={pontos} margin={{ top: 5, right: 8, bottom: 0, left: -18 }}>
-              <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" />
-              <XAxis
-                dataKey="t"
-                type="number"
-                scale="time"
-                domain={["dataMin", "dataMax"]}
-                tickFormatter={(v: number) =>
-                  new Date(v).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })
-                }
-                tick={{ fontSize: 11 }}
-                stroke="currentColor"
-                className="text-muted-foreground"
-              />
-              <YAxis
-                domain={["dataMin - 1", "dataMax + 1"]}
-                tick={{ fontSize: 11 }}
-                stroke="currentColor"
-                className="text-muted-foreground"
-              />
-              <Tooltip
-                labelFormatter={(v) => new Date(Number(v)).toLocaleDateString("pt-BR")}
-                formatter={(v) => [`${v} kg`, "Peso"]}
-                contentStyle={{
-                  background: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: 4,
-                  fontSize: 12,
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="peso"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2.5}
-                dot={{ r: 3, fill: "hsl(var(--primary))" }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+      {pontos.length > 0 && (
+        <div className="mt-5 -mx-1 overflow-x-auto pb-1">
+          <div
+            className="flex items-end gap-3 px-1"
+            style={{ minWidth: `${pontos.length * 48}px` }}
+          >
+            {pontos.map((p) => {
+              const min = Math.min(...pontos.map((x) => x.peso));
+              const max = Math.max(...pontos.map((x) => x.peso));
+              const span = max - min || 1;
+              const altura = 24 + ((p.peso - min) / span) * 116;
+              const distintos = [...new Set(pontos.map((x) => x.peso))].sort((a, b) => b - a);
+              const cor =
+                p.peso === distintos[0] && distintos.length > 1
+                  ? "bg-primary"
+                  : p.peso === distintos[1]
+                    ? "bg-gold"
+                    : p.peso === distintos[distintos.length - 1]
+                      ? "bg-emerald-500"
+                      : "bg-muted-foreground/40";
+              return (
+                <div key={p.t} className="flex w-10 shrink-0 flex-col items-center">
+                  <span className="mb-1 font-display text-xs text-foreground">
+                    {p.peso}
+                  </span>
+                  <div
+                    className={`w-3 rounded-sm ${cor} transition-[height] duration-500`}
+                    style={{ height: `${altura}px` }}
+                  />
+                  <span className="mt-1.5 text-[0.6rem] text-muted-foreground">
+                    {new Date(p.t).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                    })}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
+
+    </div>
+  );
+}
+
+const DIAS_SEMANA = ["D", "S", "T", "Q", "Q", "S", "S"];
+
+function iso(d: Date) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function ConstanciaCard({
+  periodo,
+  calendario,
+  ultimoTreino,
+}: {
+  periodo: Periodo;
+  calendario: DiaCalendario[];
+  ultimoTreino: { rotulo: string | null; completed_at: string } | null;
+}) {
+  const mapa = useMemo(
+    () => new Map(calendario.map((d) => [d.data, d.treinos])),
+    [calendario],
+  );
+
+  const hoje = new Date();
+
+  const dias = useMemo(() => {
+    if (periodo === "semana") {
+      const base = new Date(hoje);
+      base.setDate(base.getDate() - base.getDay());
+      return Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(base);
+        d.setDate(base.getDate() + i);
+        return d;
+      });
+    }
+    if (periodo === "mes") {
+      const total = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+      return Array.from(
+        { length: total },
+        (_, i) => new Date(hoje.getFullYear(), hoje.getMonth(), i + 1),
+      );
+    }
+    return [];
+  }, [periodo, hoje.getTime()]);
+
+  const semanas = useMemo(() => {
+    if (periodo === "semana" || periodo === "mes") return [];
+    const qtd = periodo === "trimestre" ? 13 : periodo === "semestre" ? 26 : 52;
+    const fim = new Date(hoje);
+    fim.setDate(fim.getDate() - fim.getDay()); // domingo desta semana
+    return Array.from({ length: qtd }, (_, i) => {
+      const inicio = new Date(fim);
+      inicio.setDate(fim.getDate() - (qtd - 1 - i) * 7);
+      let treinos = 0;
+      for (let k = 0; k < 7; k++) {
+        const d = new Date(inicio);
+        d.setDate(inicio.getDate() + k);
+        treinos += mapa.get(iso(d)) ?? 0;
+      }
+      return { inicio, treinos };
+    });
+  }, [periodo, mapa, hoje.getTime()]);
+
+  const percentual = useMemo(() => {
+    if (dias.length) {
+      const treinados = dias.filter((d) => (mapa.get(iso(d)) ?? 0) > 0).length;
+      return Math.round((treinados / dias.length) * 100);
+    }
+    if (semanas.length) {
+      const ativas = semanas.filter((s) => s.treinos > 0).length;
+      return Math.round((ativas / semanas.length) * 100);
+    }
+    return 0;
+  }, [dias, semanas, mapa]);
+
+  const maxSemana = Math.max(1, ...semanas.map((s) => s.treinos));
+
+  return (
+    <div className="surface-iron rounded-sm border border-border p-5">
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 className="text-xl">Constância</h2>
+        <span className="font-display text-2xl text-gradient-gold">{percentual}%</span>
+      </div>
+      <p className="mt-0.5 text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+        {dias.length ? "dias treinados no período" : "semanas com treino no período"}
+      </p>
+
+      {periodo === "semana" && (
+        <div className="mt-4 grid grid-cols-7 gap-1.5">
+          {dias.map((d, i) => {
+            const treinou = (mapa.get(iso(d)) ?? 0) > 0;
+            return (
+              <div key={i} className="flex flex-col items-center gap-1">
+                <span className="text-[0.6rem] uppercase text-muted-foreground">
+                  {DIAS_SEMANA[i]}
+                </span>
+                <div
+                  title={`${iso(d)}`}
+                  className={`flex aspect-square w-full items-center justify-center rounded-sm text-[0.65rem] ${
+                    treinou
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary/40 text-muted-foreground/50"
+                  }`}
+                >
+                  {d.getDate()}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {periodo === "mes" && (
+        <div className="mt-4 grid grid-cols-7 gap-1.5">
+          {dias.map((d, i) => {
+            const t = mapa.get(iso(d)) ?? 0;
+            const op = t === 0 ? 0 : t === 1 ? 0.55 : t === 2 ? 0.8 : 1;
+            return (
+              <div
+                key={i}
+                title={`${iso(d)} — ${t} treino(s)`}
+                className={`flex aspect-square items-center justify-center rounded-sm text-[0.6rem] ${
+                  t > 0 ? "text-primary-foreground" : "bg-secondary/40 text-muted-foreground/40"
+                }`}
+                style={t > 0 ? { backgroundColor: `hsl(var(--primary) / ${op})` } : undefined}
+              >
+                {d.getDate()}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {semanas.length > 0 && (
+        <div className="mt-4 overflow-x-auto pb-1">
+          <div
+            className="grid grid-flow-col grid-rows-2 gap-1.5"
+            style={{ minWidth: `${Math.ceil(semanas.length / 2) * 26}px` }}
+          >
+            {semanas.map((s, i) => {
+              const op = s.treinos === 0 ? 0 : 0.35 + (s.treinos / maxSemana) * 0.65;
+              return (
+                <div
+                  key={i}
+                  title={`Semana de ${s.inicio.toLocaleDateString("pt-BR")} — ${s.treinos} treino(s)`}
+                  className={`aspect-square rounded-sm ${s.treinos === 0 ? "bg-secondary/40" : ""}`}
+                  style={
+                    s.treinos > 0
+                      ? { backgroundColor: `hsl(var(--primary) / ${op})` }
+                      : undefined
+                  }
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="mt-4 border-t border-border pt-3">
+        <p className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
+          Último treino finalizado
+        </p>
+        {ultimoTreino?.completed_at ? (
+          <p className="mt-1 font-display text-lg uppercase tracking-wide">
+            {ultimoTreino.rotulo ?? "Treino"}{" "}
+            <span className="text-gold">— {dataAmigavel(ultimoTreino.completed_at)}</span>
+          </p>
+        ) : (
+          <p className="mt-1 text-sm text-muted-foreground">
+            Nenhum treino finalizado ainda.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
