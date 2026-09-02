@@ -150,10 +150,6 @@ function ProgressoPage() {
 
   const ultimoTreino = resumoPerfil?.ultimo_treino;
 
-  const diasComTreino = useMemo(
-    () => new Map((overview?.calendario ?? []).map((d) => [d.data, d.treinos])),
-    [overview],
-  );
 
   const diff =
     (overview?.total_treinos ?? 0) - (overview?.total_treinos_periodo_anterior ?? 0);
