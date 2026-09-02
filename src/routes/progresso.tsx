@@ -350,6 +350,20 @@ function PesoCard({ profileId }: { profileId: string }) {
     },
   });
 
+  const { data: perfil } = useQuery({
+    queryKey: ["perfil-altura", profileId],
+    enabled: !!profileId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("altura_cm, objetivo")
+        .eq("id", profileId)
+        .maybeSingle();
+      if (error) throw error;
+      return data as { altura_cm: number | null; objetivo: string | null } | null;
+    },
+  });
+
   const salvar = useMutation({
     mutationFn: async (valor: number) => {
       const { error } = await supabase
