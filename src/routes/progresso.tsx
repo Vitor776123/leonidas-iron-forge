@@ -236,47 +236,13 @@ function ProgressoPage() {
             </div>
           </div>
 
-          {/* Calendário de constância */}
-          <div className="surface-iron rounded-sm border border-border p-5">
-            <h2 className="text-xl">Constância</h2>
-            <div className="mt-4 grid grid-cols-7 gap-1.5">
-              {(overview.calendario ?? []).map((d) => (
-                <div
-                  key={d.data}
-                  title={`${d.data} — ${d.treinos} treino(s)`}
-                  className={`flex aspect-square items-center justify-center rounded-sm text-[0.6rem] ${
-                    d.treinos > 0
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-secondary/40 text-muted-foreground/40"
-                  }`}
-                >
-                  {new Date(d.data + "T12:00:00").getDate()}
-                </div>
-              ))}
-            </div>
-            {diasComTreino.size === 0 && (
-              <p className="mt-3 text-xs text-muted-foreground">
-                Nenhum treino registrado neste período.
-              </p>
-            )}
-            <div className="mt-4 border-t border-border pt-3">
-              <p className="text-[0.65rem] uppercase tracking-[0.2em] text-muted-foreground">
-                Último treino finalizado
-              </p>
-              {ultimoTreino?.completed_at ? (
-                <p className="mt-1 font-display text-lg uppercase tracking-wide">
-                  {ultimoTreino.rotulo ?? "Treino"}{" "}
-                  <span className="text-gold">
-                    — {dataAmigavel(ultimoTreino.completed_at)}
-                  </span>
-                </p>
-              ) : (
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Nenhum treino finalizado ainda.
-                </p>
-              )}
-            </div>
-          </div>
+          {/* Constância */}
+          <ConstanciaCard
+            periodo={periodo}
+            calendario={overview.calendario ?? []}
+            ultimoTreino={ultimoTreino ?? null}
+          />
+
 
           {/* Distribuição muscular */}
           <div className="surface-iron rounded-sm border border-border p-5">
