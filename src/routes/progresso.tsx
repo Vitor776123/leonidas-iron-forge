@@ -389,6 +389,29 @@ function PesoCard({ profileId }: { profileId: string }) {
 
   const ultima = resumo?.ultima_pesagem;
 
+  const faixaIdeal = useMemo(() => {
+    const alturaCm = perfil?.altura_cm;
+    if (!alturaCm || alturaCm <= 0) return null;
+    const m = alturaCm / 100;
+    return { min: 18.5 * m * m, max: 24.9 * m * m };
+  }, [perfil?.altura_cm]);
+
+  const toleraAcima = useMemo(() => {
+    const obj = (perfil?.objetivo ?? "").toLowerCase();
+    return obj.includes("hipertrofia") || obj.includes("forca") || obj.includes("força");
+  }, [perfil?.objetivo]);
+
+  const MARGEM_KG = 3;
+
+  function corPeso(p: number) {
+    if (!faixaIdeal) return "bg-muted-foreground/40";
+    // hipertrofia/força: tolera até ~3kg acima do teto sem penalidade
+    const max = toleraAcima ? faixaIdeal.max + MARGEM_KG : faixaIdeal.max;
+    if (p >= faixaIdeal.min && p <= max) return "bg-emerald-500";
+    const dist = p < faixaIdeal.min ? faixaIdeal.min - p : p - max;
+    return dist <= MARGEM_KG ? "bg-gold" : "bg-primary";
+  }
+
   function enviar() {
     const valor = Number(peso.replace(",", "."));
     if (!valor || valor <= 0) {
