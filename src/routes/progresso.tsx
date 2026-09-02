@@ -350,6 +350,20 @@ function PesoCard({ profileId }: { profileId: string }) {
     },
   });
 
+  const { data: perfil } = useQuery({
+    queryKey: ["perfil-altura", profileId],
+    enabled: !!profileId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("altura_cm, objetivo")
+        .eq("id", profileId)
+        .maybeSingle();
+      if (error) throw error;
+      return data as { altura_cm: number | null; objetivo: string | null } | null;
+    },
+  });
+
   const salvar = useMutation({
     mutationFn: async (valor: number) => {
       const { error } = await supabase
@@ -374,6 +388,29 @@ function PesoCard({ profileId }: { profileId: string }) {
   );
 
   const ultima = resumo?.ultima_pesagem;
+
+  const faixaIdeal = useMemo(() => {
+    const alturaCm = perfil?.altura_cm;
+    if (!alturaCm || alturaCm <= 0) return null;
+    const m = alturaCm / 100;
+    return { min: 18.5 * m * m, max: 24.9 * m * m };
+  }, [perfil?.altura_cm]);
+
+  const toleraAcima = useMemo(() => {
+    const obj = (perfil?.objetivo ?? "").toLowerCase();
+    return obj.includes("hipertrofia") || obj.includes("forca") || obj.includes("força");
+  }, [perfil?.objetivo]);
+
+  const MARGEM_KG = 3;
+
+  function corPeso(p: number) {
+    if (!faixaIdeal) return "bg-muted-foreground/40";
+    // hipertrofia/força: tolera até ~3kg acima do teto sem penalidade
+    const max = toleraAcima ? faixaIdeal.max + MARGEM_KG : faixaIdeal.max;
+    if (p >= faixaIdeal.min && p <= max) return "bg-emerald-500";
+    const dist = p < faixaIdeal.min ? faixaIdeal.min - p : p - max;
+    return dist <= MARGEM_KG ? "bg-gold" : "bg-primary";
+  }
 
   function enviar() {
     const valor = Number(peso.replace(",", "."));
@@ -419,6 +456,16 @@ function PesoCard({ profileId }: { profileId: string }) {
         <p className="mt-3 text-sm text-muted-foreground">Nenhuma pesagem registrada.</p>
       )}
 
+      {faixaIdeal && (
+        <p className="mt-4 text-xs text-muted-foreground">
+          Faixa ideal:{" "}
+          <span className="font-display text-sm text-gold">
+            {faixaIdeal.min.toFixed(1)}kg – {faixaIdeal.max.toFixed(1)}kg
+          </span>{" "}
+          (IMC 18.5–24.9)
+        </p>
+      )}
+
       {pontos.length > 0 && (
         <div className="mt-5 -mx-1 overflow-x-auto pb-1">
           <div
@@ -430,15 +477,7 @@ function PesoCard({ profileId }: { profileId: string }) {
               const max = Math.max(...pontos.map((x) => x.peso));
               const span = max - min || 1;
               const altura = 24 + ((p.peso - min) / span) * 116;
-              const distintos = [...new Set(pontos.map((x) => x.peso))].sort((a, b) => b - a);
-              const cor =
-                p.peso === distintos[0] && distintos.length > 1
-                  ? "bg-primary"
-                  : p.peso === distintos[1]
-                    ? "bg-gold"
-                    : p.peso === distintos[distintos.length - 1]
-                      ? "bg-emerald-500"
-                      : "bg-muted-foreground/40";
+              const cor = corPeso(p.peso);
               return (
                 <div key={p.t} className="flex w-10 shrink-0 flex-col items-center">
                   <span className="mb-1 font-display text-xs text-foreground">
