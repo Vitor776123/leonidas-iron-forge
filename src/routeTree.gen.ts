@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as OrganizacaoRouteImport } from './routes/organizacao'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as ProgressoRouteImport } from './routes/progresso'
 import { Route as QuestionarioRouteImport } from './routes/questionario'
@@ -24,6 +25,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganizacaoRoute = OrganizacaoRouteImport.update({
+  id: '/organizacao',
+  path: '/organizacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
@@ -50,6 +56,7 @@ const TreinoRoute = TreinoRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/organizacao': typeof OrganizacaoRoute
   '/perfil': typeof PerfilRoute
   '/progresso': typeof ProgressoRoute
   '/questionario': typeof QuestionarioRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/organizacao': typeof OrganizacaoRoute
   '/perfil': typeof PerfilRoute
   '/progresso': typeof ProgressoRoute
   '/questionario': typeof QuestionarioRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/organizacao': typeof OrganizacaoRoute
   '/perfil': typeof PerfilRoute
   '/progresso': typeof ProgressoRoute
   '/questionario': typeof QuestionarioRoute
@@ -75,13 +84,27 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/perfil' | '/progresso' | '/questionario' | '/treino'
+    | '/'
+    | '/auth'
+    | '/organizacao'
+    | '/perfil'
+    | '/progresso'
+    | '/questionario'
+    | '/treino'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/perfil' | '/progresso' | '/questionario' | '/treino'
+  to:
+    | '/'
+    | '/auth'
+    | '/organizacao'
+    | '/perfil'
+    | '/progresso'
+    | '/questionario'
+    | '/treino'
   id:
     | '__root__'
     | '/'
     | '/auth'
+    | '/organizacao'
     | '/perfil'
     | '/progresso'
     | '/questionario'
@@ -91,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  OrganizacaoRoute: typeof OrganizacaoRoute
   PerfilRoute: typeof PerfilRoute
   ProgressoRoute: typeof ProgressoRoute
   QuestionarioRoute: typeof QuestionarioRoute
@@ -111,6 +135,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organizacao': {
+      id: '/organizacao'
+      path: '/organizacao'
+      fullPath: '/organizacao'
+      preLoaderRoute: typeof OrganizacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -147,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  OrganizacaoRoute: OrganizacaoRoute,
   PerfilRoute: PerfilRoute,
   ProgressoRoute: ProgressoRoute,
   QuestionarioRoute: QuestionarioRoute,
