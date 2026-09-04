@@ -80,7 +80,7 @@ function TabLink({
   icon,
   label,
 }: {
-  to: "/treino" | "/progresso" | "/perfil";
+  to: "/treino" | "/progresso" | "/perfil" | "/organizacao";
   icon: ReactNode;
   label: string;
 }) {
