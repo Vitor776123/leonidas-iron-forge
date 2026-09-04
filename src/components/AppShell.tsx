@@ -1,10 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Dumbbell, LogOut, TrendingUp, User } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Building2, Dumbbell, LogOut, TrendingUp, User } from "lucide-react";
 import helmetAsset from "@/assets/leonidas_helmet.png.asset.json";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { usePerfil } from "@/hooks/usePerfil";
 
 export function AppShell({
   children,
@@ -16,26 +15,14 @@ export function AppShell({
   headerLeft?: ReactNode;
 }) {
   const navigate = useNavigate();
-  const { user } = useAuth();
-
-  const { data: nome } = useQuery({
-    queryKey: ["header-nome", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("nome")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-      if (error) throw error;
-      return (data?.nome as string | null) ?? null;
-    },
-  });
+  const { perfil, ehGestor } = usePerfil();
+  const nome = perfil?.nome ?? null;
 
   async function signOut() {
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
+
 
   return (
     <div className="min-h-screen">
@@ -67,11 +54,21 @@ export function AppShell({
       <div className="fixed inset-x-0 bottom-0 z-50">
         {bottomBar}
         <nav className="border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
-          <div className="mx-auto grid max-w-2xl grid-cols-3">
+          <div
+            className={`mx-auto grid max-w-2xl ${ehGestor ? "grid-cols-4" : "grid-cols-3"}`}
+          >
             <TabLink to="/treino" icon={<Dumbbell className="size-6" />} label="Treino" />
             <TabLink to="/progresso" icon={<TrendingUp className="size-6" />} label="Progresso" />
+            {ehGestor && (
+              <TabLink
+                to="/organizacao"
+                icon={<Building2 className="size-6" />}
+                label="Organização"
+              />
+            )}
             <TabLink to="/perfil" icon={<User className="size-6" />} label="Perfil" />
           </div>
+
         </nav>
       </div>
     </div>
@@ -83,7 +80,7 @@ function TabLink({
   icon,
   label,
 }: {
-  to: "/treino" | "/progresso" | "/perfil";
+  to: "/treino" | "/progresso" | "/perfil" | "/organizacao";
   icon: ReactNode;
   label: string;
 }) {

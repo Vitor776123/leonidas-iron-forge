@@ -11,10 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as OrganizacaoRouteImport } from './routes/organizacao'
 import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as ProgressoRouteImport } from './routes/progresso'
 import { Route as QuestionarioRouteImport } from './routes/questionario'
 import { Route as TreinoRouteImport } from './routes/treino'
+import { Route as AlunoAlunoIdRouteImport } from './routes/aluno.$alunoId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -24,6 +26,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrganizacaoRoute = OrganizacaoRouteImport.update({
+  id: '/organizacao',
+  path: '/organizacao',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PerfilRoute = PerfilRouteImport.update({
@@ -46,55 +53,85 @@ const TreinoRoute = TreinoRouteImport.update({
   path: '/treino',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlunoAlunoIdRoute = AlunoAlunoIdRouteImport.update({
+  id: '/aluno/$alunoId',
+  path: '/aluno/$alunoId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/organizacao': typeof OrganizacaoRoute
   '/perfil': typeof PerfilRoute
   '/progresso': typeof ProgressoRoute
   '/questionario': typeof QuestionarioRoute
   '/treino': typeof TreinoRoute
+  '/aluno/$alunoId': typeof AlunoAlunoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/organizacao': typeof OrganizacaoRoute
   '/perfil': typeof PerfilRoute
   '/progresso': typeof ProgressoRoute
   '/questionario': typeof QuestionarioRoute
   '/treino': typeof TreinoRoute
+  '/aluno/$alunoId': typeof AlunoAlunoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/organizacao': typeof OrganizacaoRoute
   '/perfil': typeof PerfilRoute
   '/progresso': typeof ProgressoRoute
   '/questionario': typeof QuestionarioRoute
   '/treino': typeof TreinoRoute
+  '/aluno/$alunoId': typeof AlunoAlunoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/auth' | '/perfil' | '/progresso' | '/questionario' | '/treino'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/perfil' | '/progresso' | '/questionario' | '/treino'
-  id:
-    | '__root__'
     | '/'
     | '/auth'
+    | '/organizacao'
     | '/perfil'
     | '/progresso'
     | '/questionario'
     | '/treino'
+    | '/aluno/$alunoId'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | '/auth'
+    | '/organizacao'
+    | '/perfil'
+    | '/progresso'
+    | '/questionario'
+    | '/treino'
+    | '/aluno/$alunoId'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/organizacao'
+    | '/perfil'
+    | '/progresso'
+    | '/questionario'
+    | '/treino'
+    | '/aluno/$alunoId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRoute
+  OrganizacaoRoute: typeof OrganizacaoRoute
   PerfilRoute: typeof PerfilRoute
   ProgressoRoute: typeof ProgressoRoute
   QuestionarioRoute: typeof QuestionarioRoute
   TreinoRoute: typeof TreinoRoute
+  AlunoAlunoIdRoute: typeof AlunoAlunoIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -111,6 +148,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/organizacao': {
+      id: '/organizacao'
+      path: '/organizacao'
+      fullPath: '/organizacao'
+      preLoaderRoute: typeof OrganizacaoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/perfil': {
@@ -141,16 +185,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TreinoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aluno/$alunoId': {
+      id: '/aluno/$alunoId'
+      path: '/aluno/$alunoId'
+      fullPath: '/aluno/$alunoId'
+      preLoaderRoute: typeof AlunoAlunoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
+  OrganizacaoRoute: OrganizacaoRoute,
   PerfilRoute: PerfilRoute,
   ProgressoRoute: ProgressoRoute,
   QuestionarioRoute: QuestionarioRoute,
   TreinoRoute: TreinoRoute,
+  AlunoAlunoIdRoute: AlunoAlunoIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
