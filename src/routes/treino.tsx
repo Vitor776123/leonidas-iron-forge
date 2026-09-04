@@ -196,6 +196,8 @@ function TreinoPage() {
       });
       if (error) throw error;
       toast.success("Treino finalizado. Boa!");
+      salvarUltimoFinalizado(ativo.id);
+      setUltimoFinalizadoId(ativo.id);
       if (proximo) setDiaAtivo(proximo as string);
       queryClient.invalidateQueries({ queryKey: ["plano"] });
     } catch (err) {
