@@ -54,11 +54,21 @@ export function AppShell({
       <div className="fixed inset-x-0 bottom-0 z-50">
         {bottomBar}
         <nav className="border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
-          <div className="mx-auto grid max-w-2xl grid-cols-3">
+          <div
+            className={`mx-auto grid max-w-2xl ${ehGestor ? "grid-cols-4" : "grid-cols-3"}`}
+          >
             <TabLink to="/treino" icon={<Dumbbell className="size-6" />} label="Treino" />
             <TabLink to="/progresso" icon={<TrendingUp className="size-6" />} label="Progresso" />
+            {ehGestor && (
+              <TabLink
+                to="/organizacao"
+                icon={<Building2 className="size-6" />}
+                label="Organização"
+              />
+            )}
             <TabLink to="/perfil" icon={<User className="size-6" />} label="Perfil" />
           </div>
+
         </nav>
       </div>
     </div>
