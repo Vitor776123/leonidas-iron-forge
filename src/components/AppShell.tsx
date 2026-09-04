@@ -1,10 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Dumbbell, LogOut, TrendingUp, User } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { Building2, Dumbbell, LogOut, TrendingUp, User } from "lucide-react";
 import helmetAsset from "@/assets/leonidas_helmet.png.asset.json";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+import { usePerfil } from "@/hooks/usePerfil";
 
 export function AppShell({
   children,
@@ -16,26 +15,14 @@ export function AppShell({
   headerLeft?: ReactNode;
 }) {
   const navigate = useNavigate();
-  const { user } = useAuth();
-
-  const { data: nome } = useQuery({
-    queryKey: ["header-nome", user?.id],
-    enabled: !!user,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("nome")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-      if (error) throw error;
-      return (data?.nome as string | null) ?? null;
-    },
-  });
+  const { perfil, ehGestor } = usePerfil();
+  const nome = perfil?.nome ?? null;
 
   async function signOut() {
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
+
 
   return (
     <div className="min-h-screen">
