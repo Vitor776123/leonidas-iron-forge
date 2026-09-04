@@ -65,6 +65,7 @@ export const Route = createFileRoute("/treino")({
 });
 
 const CUSTOM_KEY = "leonidas:dias-personalizados";
+const ULTIMO_FINALIZADO_KEY = "leonidas:ultimo-dia-finalizado";
 
 function lerCustom(): string[] {
   if (typeof window === "undefined") return [];
@@ -73,6 +74,24 @@ function lerCustom(): string[] {
     return raw ? (JSON.parse(raw) as string[]) : [];
   } catch {
     return [];
+  }
+}
+
+function lerUltimoFinalizado(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(ULTIMO_FINALIZADO_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function salvarUltimoFinalizado(id: string) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(ULTIMO_FINALIZADO_KEY, id);
+  } catch {
+    // ignore
   }
 }
 
@@ -91,8 +110,12 @@ function TreinoPage() {
   const [excluindoEx, setExcluindoEx] = useState<WorkoutExercise | null>(null);
   const [adicionarEm, setAdicionarEm] = useState<WorkoutDay | null>(null);
   const [customIds, setCustomIds] = useState<string[]>([]);
+  const [ultimoFinalizadoId, setUltimoFinalizadoId] = useState<string | null>(null);
 
-  useEffect(() => setCustomIds(lerCustom()), []);
+  useEffect(() => {
+    setCustomIds(lerCustom());
+    setUltimoFinalizadoId(lerUltimoFinalizado());
+  }, []);
 
   function marcarCustom(id: string) {
     const novos = Array.from(new Set([...lerCustom(), id]));
