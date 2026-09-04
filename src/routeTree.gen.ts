@@ -16,6 +16,7 @@ import { Route as PerfilRouteImport } from './routes/perfil'
 import { Route as ProgressoRouteImport } from './routes/progresso'
 import { Route as QuestionarioRouteImport } from './routes/questionario'
 import { Route as TreinoRouteImport } from './routes/treino'
+import { Route as AlunoAlunoIdRouteImport } from './routes/aluno.$alunoId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const TreinoRoute = TreinoRouteImport.update({
   path: '/treino',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlunoAlunoIdRoute = AlunoAlunoIdRouteImport.update({
+  id: '/aluno/$alunoId',
+  path: '/aluno/$alunoId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/progresso': typeof ProgressoRoute
   '/questionario': typeof QuestionarioRoute
   '/treino': typeof TreinoRoute
+  '/aluno/$alunoId': typeof AlunoAlunoIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/progresso': typeof ProgressoRoute
   '/questionario': typeof QuestionarioRoute
   '/treino': typeof TreinoRoute
+  '/aluno/$alunoId': typeof AlunoAlunoIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/progresso': typeof ProgressoRoute
   '/questionario': typeof QuestionarioRoute
   '/treino': typeof TreinoRoute
+  '/aluno/$alunoId': typeof AlunoAlunoIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/progresso'
     | '/questionario'
     | '/treino'
+    | '/aluno/$alunoId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/progresso'
     | '/questionario'
     | '/treino'
+    | '/aluno/$alunoId'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/progresso'
     | '/questionario'
     | '/treino'
+    | '/aluno/$alunoId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   ProgressoRoute: typeof ProgressoRoute
   QuestionarioRoute: typeof QuestionarioRoute
   TreinoRoute: typeof TreinoRoute
+  AlunoAlunoIdRoute: typeof AlunoAlunoIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TreinoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aluno/$alunoId': {
+      id: '/aluno/$alunoId'
+      path: '/aluno/$alunoId'
+      fullPath: '/aluno/$alunoId'
+      preLoaderRoute: typeof AlunoAlunoIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProgressoRoute: ProgressoRoute,
   QuestionarioRoute: QuestionarioRoute,
   TreinoRoute: TreinoRoute,
+  AlunoAlunoIdRoute: AlunoAlunoIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
