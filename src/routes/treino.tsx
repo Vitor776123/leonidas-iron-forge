@@ -555,6 +555,7 @@ function DiasDrawer({
   onOpenChange,
   dias,
   ativoId,
+  ultimoFinalizadoId,
   customIds,
   onSelect,
   onDelete,
@@ -565,6 +566,7 @@ function DiasDrawer({
   onOpenChange: (o: boolean) => void;
   dias: WorkoutDay[];
   ativoId: string | null;
+  ultimoFinalizadoId: string | null;
   customIds: string[];
   onSelect: (id: string) => void;
   onDelete: (d: WorkoutDay) => void;
@@ -574,35 +576,48 @@ function DiasDrawer({
   const gerados = dias.filter((d) => !customIds.includes(d.id));
   const personalizados = dias.filter((d) => customIds.includes(d.id));
 
-  const item = (d: WorkoutDay, handle: ReactNode) => (
-    <div
-      className={`flex items-stretch overflow-hidden rounded-sm border-2 transition-colors ${
-        ativoId === d.id
-          ? "border-primary bg-primary/15"
-          : "border-border bg-secondary/40"
-      }`}
-    >
-      {handle}
-      <button
-        onClick={() => onSelect(d.id)}
-        className="min-h-[52px] min-w-0 flex-1 py-3 pr-2 text-left font-display text-base uppercase tracking-wide"
+  const item = (d: WorkoutDay, handle: ReactNode) => {
+    const ehUltimoFinalizado = ultimoFinalizadoId === d.id;
+    return (
+      <div
+        className={`flex items-stretch overflow-hidden rounded-sm border-2 transition-colors ${
+          ativoId === d.id
+            ? "border-primary bg-primary/15"
+            : ehUltimoFinalizado
+              ? "border-gold/60 bg-gold/10"
+              : "border-border bg-secondary/40"
+        }`}
       >
-        <span className={`block truncate ${ativoId === d.id ? "text-primary" : "text-foreground"}`}>
-          {d.rotulo}
-        </span>
-        <span className="block text-xs tracking-widest text-muted-foreground">
-          {d.workout_exercises.length} exercícios
-        </span>
-      </button>
-      <button
-        onClick={() => onDelete(d)}
-        aria-label={`Excluir ${d.rotulo}`}
-        className="flex w-12 shrink-0 items-center justify-center text-muted-foreground transition-colors active:bg-primary/20 active:text-primary"
-      >
-        <Trash2 className="size-4" />
-      </button>
-    </div>
-  );
+        {handle}
+        <button
+          onClick={() => onSelect(d.id)}
+          className="min-h-[52px] min-w-0 flex-1 py-3 pr-2 text-left font-display text-base uppercase tracking-wide"
+        >
+          <span className="flex items-center gap-2">
+            <span className={`block truncate ${ativoId === d.id ? "text-primary" : "text-foreground"}`}>
+              {d.rotulo}
+            </span>
+            {ehUltimoFinalizado && (
+              <span className="flex shrink-0 items-center gap-1 rounded-sm bg-gold/20 px-1.5 py-0.5 text-gold">
+                <Award className="size-3.5" />
+                <span className="font-sans text-[10px] font-bold uppercase tracking-wider">Último</span>
+              </span>
+            )}
+          </span>
+          <span className="block text-xs tracking-widest text-muted-foreground">
+            {d.workout_exercises.length} exercícios
+          </span>
+        </button>
+        <button
+          onClick={() => onDelete(d)}
+          aria-label={`Excluir ${d.rotulo}`}
+          className="flex w-12 shrink-0 items-center justify-center text-muted-foreground transition-colors active:bg-primary/20 active:text-primary"
+        >
+          <Trash2 className="size-4" />
+        </button>
+      </div>
+    );
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
