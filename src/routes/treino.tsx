@@ -433,6 +433,7 @@ function TreinoPage() {
         onOpenChange={setMenuAberto}
         dias={dias}
         ativoId={ativo?.id ?? null}
+        ultimoFinalizadoId={ultimoFinalizadoId}
         customIds={customIds}
         onReorder={reordenarDias}
         onSelect={(id) => {
