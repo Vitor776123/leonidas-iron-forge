@@ -4,6 +4,7 @@ import helmetAsset from "@/assets/leonidas_helmet.png.asset.json";
 import type { ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil } from "@/hooks/usePerfil";
+import { useMarca } from "@/hooks/useMarca";
 
 export function AppShell({
   children,
@@ -16,6 +17,7 @@ export function AppShell({
 }) {
   const navigate = useNavigate();
   const { perfil, ehGestor } = usePerfil();
+  const { nomeMarca, logoUrl } = useMarca();
   const nome = perfil?.nome ?? null;
 
   async function signOut() {
@@ -31,12 +33,12 @@ export function AppShell({
           {headerLeft ?? <span />}
           <Link to="/treino" className="flex min-w-0 items-center gap-2">
             <img
-              src={helmetAsset.url}
-              alt="Leonidas"
+              src={logoUrl ?? helmetAsset.url}
+              alt={nomeMarca ?? "Leonidas"}
               className="size-9 shrink-0 object-contain"
             />
             <span className="truncate font-display text-xl uppercase tracking-[0.2em]">
-              {nome || "LEONIDAS"}
+              {nome || nomeMarca || "LEONIDAS"}
             </span>
           </Link>
           <button

@@ -83,7 +83,6 @@ type Form = {
   objetivos: string[];
   foco: string;
   grupos_customizados: string[];
-  professor_id: string;
 };
 
 const EMPTY: Form = {
@@ -98,7 +97,6 @@ const EMPTY: Form = {
   objetivos: [],
   foco: "",
   grupos_customizados: [],
-  professor_id: "",
 };
 
 
@@ -108,19 +106,6 @@ function Questionario() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<Form>(EMPTY);
   const [saving, setSaving] = useState(false);
-
-  const { data: professores } = useQuery({
-    queryKey: ["professores-disponiveis"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, nome")
-        .eq("role", "professor")
-        .order("nome");
-      if (error) throw error;
-      return (data ?? []) as { id: string; nome: string | null }[];
-    },
-  });
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
@@ -274,40 +259,6 @@ function Questionario() {
         </div>
       ),
     },
-    {
-      titulo: "Quem é seu professor?",
-      sub: "Opcional — deixe em branco se treina por conta própria.",
-      valido: true,
-      render: () => (
-        <div className="grid gap-3">
-          <button
-            type="button"
-            onClick={() => setForm((f) => ({ ...f, professor_id: "" }))}
-            className={`min-h-[56px] rounded-sm border px-4 text-left font-display uppercase tracking-widest ${
-              form.professor_id === ""
-                ? "border-primary bg-primary/10 text-foreground"
-                : "border-border text-muted-foreground"
-            }`}
-          >
-            Sem professor
-          </button>
-          {professores?.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => setForm((f) => ({ ...f, professor_id: p.id }))}
-              className={`min-h-[56px] rounded-sm border px-4 text-left font-display uppercase tracking-widest ${
-                form.professor_id === p.id
-                  ? "border-primary bg-primary/10 text-foreground"
-                  : "border-border text-muted-foreground"
-              }`}
-            >
-              {p.nome ?? "Professor"}
-            </button>
-          ))}
-        </div>
-      ),
-    },
   ];
 
   const atual = steps[step]!;
@@ -336,7 +287,6 @@ function Questionario() {
           form.foco === "foco_customizado"
             ? form.grupos_customizados.map(() => "foco_customizado")
             : [form.foco],
-        professor_id: form.professor_id || null,
         focos_customizados_prioridade:
           form.foco === "foco_customizado" ? form.grupos_customizados : [],
       };
