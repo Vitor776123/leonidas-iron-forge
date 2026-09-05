@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { perfilEstaCompleto } from "@/hooks/usePerfil";
 
 export const Route = createFileRoute("/")({
   ssr: false,
@@ -20,11 +21,18 @@ function Index() {
     }
     supabase
       .from("profiles")
-      .select("id")
+      .select("id, idade, altura_cm, peso_kg, objetivo")
       .eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data }) => {
-        navigate({ to: data ? "/treino" : "/questionario", replace: true });
+      .then(({ data, error }) => {
+        // Em caso de erro de leitura, nunca reabrir o onboarding.
+        if (error) {
+          navigate({ to: "/treino", replace: true });
+          return;
+        }
+        const row = data as Record<string, unknown> | null;
+        const novo = !row || !perfilEstaCompleto(row);
+        navigate({ to: novo ? "/questionario" : "/treino", replace: true });
       });
   }, [user, loading, navigate]);
 
