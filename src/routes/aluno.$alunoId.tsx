@@ -110,7 +110,10 @@ function AlunoPage() {
 
   async function regenerar() {
     const { error } = await supabase.rpc("generate_workout_plan", { p_profile_id: alunoId });
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Novo plano gerado.");
     qc.invalidateQueries({ queryKey: ["aluno-plano", alunoId] });
   }
@@ -118,7 +121,10 @@ function AlunoPage() {
   async function excluirExercicio(id: string) {
     if (!confirm("Excluir este exercício?")) return;
     const { error } = await supabase.from("workout_exercises").delete().eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     qc.invalidateQueries({ queryKey: ["aluno-plano", alunoId] });
   }
 
@@ -127,9 +133,13 @@ function AlunoPage() {
     v: { series: number; reps_min: number; reps_max: number },
   ) {
     const { error } = await supabase.from("workout_exercises").update(v).eq("id", id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("Atualizado.");
     qc.invalidateQueries({ queryKey: ["aluno-plano", alunoId] });
+
   }
 
   return (
