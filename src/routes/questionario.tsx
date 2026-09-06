@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ArrowLeft, ArrowRight, Flame } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -99,7 +98,6 @@ const EMPTY: Form = {
   grupos_customizados: [],
 };
 
-
 function Questionario() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
@@ -111,8 +109,19 @@ function Questionario() {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
   }, [user, loading, navigate]);
 
-  const set = (k: "nome" | "idade" | "altura_cm" | "peso_kg" | "genero" | "dias_por_semana" | "tempo_treino_meses" | "categoria" | "foco", v: string) =>
-    setForm((f) => ({ ...f, [k]: v }));
+  const set = (
+    k:
+      | "nome"
+      | "idade"
+      | "altura_cm"
+      | "peso_kg"
+      | "genero"
+      | "dias_por_semana"
+      | "tempo_treino_meses"
+      | "categoria"
+      | "foco",
+    v: string,
+  ) => setForm((f) => ({ ...f, [k]: v }));
 
   const toggle = (k: "objetivos" | "grupos_customizados", v: string, max?: number) =>
     setForm((f) => {
@@ -121,7 +130,6 @@ function Questionario() {
       if (max && cur.length >= max) return f;
       return { ...f, [k]: [...cur, v] };
     });
-
 
   const steps: {
     titulo: string;
@@ -178,11 +186,7 @@ function Questionario() {
       titulo: "Gênero",
       valido: !!form.genero,
       render: () => (
-        <Options
-          options={GENEROS}
-          value={form.genero}
-          onChange={(v) => set("genero", v)}
-        />
+        <Options options={GENEROS} value={form.genero} onChange={(v) => set("genero", v)} />
       ),
     },
     {
@@ -237,8 +241,7 @@ function Questionario() {
     {
       titulo: "Ênfase do treino",
       valido:
-        !!form.foco &&
-        (form.foco !== "foco_customizado" || form.grupos_customizados.length > 0),
+        !!form.foco && (form.foco !== "foco_customizado" || form.grupos_customizados.length > 0),
       render: () => (
         <div className="space-y-4">
           <Options options={FOCOS} value={form.foco} onChange={(v) => set("foco", v)} />
@@ -290,7 +293,6 @@ function Questionario() {
         focos_customizados_prioridade:
           form.foco === "foco_customizado" ? form.grupos_customizados : [],
       };
-
 
       const profilePayload: typeof payload & { imc?: number | null } = { ...payload };
       delete profilePayload["imc"];
@@ -366,11 +368,7 @@ function Questionario() {
 
         <div className="mt-10 flex gap-3">
           {step > 0 && (
-            <Button
-              variant="secondary"
-              className="h-12"
-              onClick={() => setStep((s) => s - 1)}
-            >
+            <Button variant="secondary" className="h-12" onClick={() => setStep((s) => s - 1)}>
               <ArrowLeft className="size-5" />
             </Button>
           )}
@@ -427,9 +425,7 @@ function Options({
   onChange: (v: string) => void;
   columns?: boolean;
 }) {
-  const items: Opt[] = options.map((o) =>
-    typeof o === "string" ? { label: o, value: o } : o,
-  );
+  const items: Opt[] = options.map((o) => (typeof o === "string" ? { label: o, value: o } : o));
   return (
     <div className={columns ? "grid grid-cols-2 gap-3 sm:grid-cols-3" : "space-y-3"}>
       {items.map((o) => {
@@ -491,9 +487,7 @@ function PriorityOptions({
             {on && (
               <span
                 className={`flex size-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                  idx === 0
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-gold text-background"
+                  idx === 0 ? "bg-primary text-primary-foreground" : "bg-gold text-background"
                 }`}
               >
                 {idx + 1}

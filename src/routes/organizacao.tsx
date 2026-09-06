@@ -79,7 +79,11 @@ function OrganizacaoPage() {
 /* ------------------------------- DONO ------------------------------- */
 
 function TelaDono({ perfilId }: { perfilId: string | undefined }) {
-  const { data: orgs, isLoading, refetch } = useQuery({
+  const {
+    data: orgs,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["orgs-dono", perfilId],
     enabled: !!perfilId,
     queryFn: async () => {
@@ -123,9 +127,7 @@ function TelaDono({ perfilId }: { perfilId: string | undefined }) {
         {!isLoading && (orgs?.length ?? 0) === 0 && (
           <div className="surface-iron rounded-sm border border-border p-6 text-center">
             <Building2 className="mx-auto size-8 text-muted-foreground" />
-            <p className="mt-3 text-sm text-muted-foreground">
-              Nenhuma academia criada ainda.
-            </p>
+            <p className="mt-3 text-sm text-muted-foreground">Nenhuma academia criada ainda.</p>
           </div>
         )}
         {orgs?.map((org) => (
@@ -174,9 +176,7 @@ function CardOrganizacao({
       toast.success("Academia atualizada.");
       onSalvo();
     } catch (err) {
-      toast.error(
-        mensagemAmigavel(err instanceof Error ? err.message : "Falha ao salvar"),
-      );
+      toast.error(mensagemAmigavel(err instanceof Error ? err.message : "Falha ao salvar"));
     } finally {
       setBusy(false);
     }
@@ -291,9 +291,7 @@ function CriarDiretor({ onCriado }: { onCriado: () => void }) {
       onCriado();
       toast.success("Academia e diretor criados.");
     } catch (err) {
-      toast.error(
-        mensagemAmigavel(err instanceof Error ? err.message : "Falha ao criar academia"),
-      );
+      toast.error(mensagemAmigavel(err instanceof Error ? err.message : "Falha ao criar academia"));
     } finally {
       setBusy(false);
     }
@@ -416,14 +414,12 @@ function CriarDiretor({ onCriado }: { onCriado: () => void }) {
 
 /* --------------------- DIRETOR / PROFESSOR --------------------- */
 
-function TelaGestor({
-  perfilId,
-  ehDiretor,
-}: {
-  perfilId: string | undefined;
-  ehDiretor: boolean;
-}) {
-  const { data: pessoas, isLoading, refetch } = useQuery({
+function TelaGestor({ perfilId, ehDiretor }: { perfilId: string | undefined; ehDiretor: boolean }) {
+  const {
+    data: pessoas,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["organizacao", perfilId, ehDiretor],
     enabled: !!perfilId,
     queryFn: async () => {
@@ -445,11 +441,7 @@ function TelaGestor({
         {ehDiretor ? "Seus professores" : "Seus alunos"}
       </p>
 
-      {ehDiretor ? (
-        <CriarProfessor onCriado={() => refetch()} />
-      ) : (
-        <ConvidarAluno />
-      )}
+      {ehDiretor ? <CriarProfessor onCriado={() => refetch()} /> : <ConvidarAluno />}
 
       <div className="mt-6 space-y-3">
         {isLoading && <p className="text-sm text-muted-foreground">Carregando…</p>}
@@ -633,16 +625,13 @@ function ConvidarAluno() {
       const resp = data as { link?: string; token?: string; error?: string } | null;
       if (resp?.error) throw new Error(resp.error);
       const url =
-        resp?.link ??
-        (resp?.token ? `${window.location.origin}/convite/${resp.token}` : null);
+        resp?.link ?? (resp?.token ? `${window.location.origin}/convite/${resp.token}` : null);
       if (!url) throw new Error("Resposta inválida da função");
       setLink(url);
       setEmail("");
       toast.success("Convite enviado.");
     } catch (err) {
-      toast.error(
-        mensagemAmigavel(err instanceof Error ? err.message : "Falha ao convidar"),
-      );
+      toast.error(mensagemAmigavel(err instanceof Error ? err.message : "Falha ao convidar"));
     } finally {
       setBusy(false);
     }

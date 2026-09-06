@@ -47,9 +47,12 @@ function ConvitePage() {
           body: { token },
         });
         if (error) throw error;
-        const resp = data as
-          | { valido?: boolean; email?: string; academia?: string | null; error?: string }
-          | null;
+        const resp = data as {
+          valido?: boolean;
+          email?: string;
+          academia?: string | null;
+          error?: string;
+        } | null;
         if (!ativo) return;
         if (!resp?.valido) {
           setEstado({
