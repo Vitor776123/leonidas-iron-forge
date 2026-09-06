@@ -17,6 +17,7 @@ import { Route as ProgressoRouteImport } from './routes/progresso'
 import { Route as QuestionarioRouteImport } from './routes/questionario'
 import { Route as TreinoRouteImport } from './routes/treino'
 import { Route as AlunoAlunoIdRouteImport } from './routes/aluno.$alunoId'
+import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -58,6 +59,11 @@ const AlunoAlunoIdRoute = AlunoAlunoIdRouteImport.update({
   path: '/aluno/$alunoId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConviteTokenRoute = ConviteTokenRouteImport.update({
+  id: '/convite/$token',
+  path: '/convite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -68,6 +74,7 @@ export interface FileRoutesByFullPath {
   '/questionario': typeof QuestionarioRoute
   '/treino': typeof TreinoRoute
   '/aluno/$alunoId': typeof AlunoAlunoIdRoute
+  '/convite/$token': typeof ConviteTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByTo {
   '/questionario': typeof QuestionarioRoute
   '/treino': typeof TreinoRoute
   '/aluno/$alunoId': typeof AlunoAlunoIdRoute
+  '/convite/$token': typeof ConviteTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -89,6 +97,7 @@ export interface FileRoutesById {
   '/questionario': typeof QuestionarioRoute
   '/treino': typeof TreinoRoute
   '/aluno/$alunoId': typeof AlunoAlunoIdRoute
+  '/convite/$token': typeof ConviteTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -101,6 +110,7 @@ export interface FileRouteTypes {
     | '/questionario'
     | '/treino'
     | '/aluno/$alunoId'
+    | '/convite/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/questionario'
     | '/treino'
     | '/aluno/$alunoId'
+    | '/convite/$token'
   id:
     | '__root__'
     | '/'
@@ -121,6 +132,7 @@ export interface FileRouteTypes {
     | '/questionario'
     | '/treino'
     | '/aluno/$alunoId'
+    | '/convite/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -132,6 +144,7 @@ export interface RootRouteChildren {
   QuestionarioRoute: typeof QuestionarioRoute
   TreinoRoute: typeof TreinoRoute
   AlunoAlunoIdRoute: typeof AlunoAlunoIdRoute
+  ConviteTokenRoute: typeof ConviteTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -192,6 +205,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AlunoAlunoIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/convite/$token': {
+      id: '/convite/$token'
+      path: '/convite/$token'
+      fullPath: '/convite/$token'
+      preLoaderRoute: typeof ConviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -204,6 +224,7 @@ const rootRouteChildren: RootRouteChildren = {
   QuestionarioRoute: QuestionarioRoute,
   TreinoRoute: TreinoRoute,
   AlunoAlunoIdRoute: AlunoAlunoIdRoute,
+  ConviteTokenRoute: ConviteTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

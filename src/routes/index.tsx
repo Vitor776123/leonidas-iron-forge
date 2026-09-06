@@ -38,9 +38,7 @@ function Index() {
 
   return (
     <div className="flex min-h-screen items-center justify-center">
-      <span className="font-display text-3xl tracking-[0.3em] text-muted-foreground">
-        LEONIDAS
-      </span>
+      <span className="font-display text-3xl tracking-[0.3em] text-muted-foreground">LEONIDAS</span>
     </div>
   );
 }
