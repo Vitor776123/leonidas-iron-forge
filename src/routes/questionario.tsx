@@ -70,7 +70,18 @@ const GRUPOS: Opt[] = [
   { label: "Parte superior das costas", value: "upper-back" },
 ];
 
+type Grupo = { chave: string; rotulo: string; descricao: string | null };
+const EQUIP_FALLBACK: Grupo[] = [
+  { chave: "maquinas", rotulo: "Máquinas e polias", descricao: null },
+  { chave: "halteres", rotulo: "Halteres", descricao: null },
+  { chave: "peso_corpo", rotulo: "Peso do corpo", descricao: null },
+  { chave: "elastico", rotulo: "Elástico", descricao: null },
+  { chave: "avancados", rotulo: "Barras e treinos avançados", descricao: null },
+];
+const SEM_PREF = "__sem_preferencia__";
+
 type Form = {
+  equipamentos: string[];
   nome: string;
   idade: string;
   altura_cm: string;
@@ -96,6 +107,7 @@ const EMPTY: Form = {
   objetivos: [],
   foco: "",
   grupos_customizados: [],
+  equipamentos: [],
 };
 
 function Questionario() {
@@ -104,6 +116,28 @@ function Questionario() {
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<Form>(EMPTY);
   const [saving, setSaving] = useState(false);
+  const [equipOpts, setEquipOpts] = useState<Grupo[]>(EQUIP_FALLBACK);
+
+  useEffect(() => {
+    supabase
+      .from("equipamento_grupos")
+      .select("chave, rotulo, descricao")
+      .order("ordem")
+      .then(({ data, error }) => {
+        if (!error && data && data.length) setEquipOpts(data as Grupo[]);
+      });
+  }, []);
+
+  const toggleEquip = (v: string) =>
+    setForm((f) => {
+      if (v === SEM_PREF)
+        return { ...f, equipamentos: f.equipamentos.includes(SEM_PREF) ? [] : [SEM_PREF] };
+      const cur = f.equipamentos.filter((x) => x !== SEM_PREF);
+      return {
+        ...f,
+        equipamentos: cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v],
+      };
+    });
 
   useEffect(() => {
     if (!loading && !user) navigate({ to: "/auth", replace: true });
@@ -262,6 +296,44 @@ function Questionario() {
         </div>
       ),
     },
+    {
+      titulo: "Como você prefere treinar?",
+      sub: "pode marcar mais de uma opção",
+      valido: form.equipamentos.length > 0,
+      render: () => (
+        <div className="space-y-3">
+          {[
+            ...equipOpts,
+            { chave: SEM_PREF, rotulo: "Sem preferência (qualquer equipamento)", descricao: null },
+          ].map((o) => {
+            const on = form.equipamentos.includes(o.chave);
+            return (
+              <button
+                key={o.chave}
+                type="button"
+                onClick={() => toggleEquip(o.chave)}
+                className={`w-full rounded-sm border-2 px-4 py-3 text-left transition-all ${
+                  on
+                    ? "border-primary bg-primary/15 text-foreground shadow-[var(--shadow-blood)]"
+                    : "border-border bg-card text-muted-foreground hover:border-gold/60 hover:text-foreground"
+                }`}
+              >
+                <span className="block font-display text-lg uppercase tracking-wide">
+                  {on ? "☑ " : "☐ "}
+                  {o.rotulo}
+                </span>
+                {o.descricao && (
+                  <span className="mt-1 block text-xs text-muted-foreground">{o.descricao}</span>
+                )}
+              </button>
+            );
+          })}
+          <p className="text-xs text-muted-foreground">
+            Escolher poucos equipamentos pode deixar alguns grupos musculares com menos exercícios.
+          </p>
+        </div>
+      ),
+    },
   ];
 
   const atual = steps[step]!;
@@ -292,6 +364,9 @@ function Questionario() {
             : [form.foco],
         focos_customizados_prioridade:
           form.foco === "foco_customizado" ? form.grupos_customizados : [],
+        equipamentos_preferidos: form.equipamentos.includes(SEM_PREF)
+          ? null
+          : form.equipamentos,
       };
 
       const profilePayload: typeof payload & { imc?: number | null } = { ...payload };
