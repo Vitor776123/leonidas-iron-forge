@@ -132,21 +132,28 @@ function TreinoPage() {
     enabled: !!user,
     queryFn: async () => {
       const vazio = { semPerfil: false, planId: null as string | null, atualId: null as string | null, dias: [] as WorkoutDay[] };
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-      if (!profile) return { ...vazio, semPerfil: true };
+      // o id do perfil já costuma estar em cache (o menu o carrega): evita uma ida ao servidor
+      let profileId = queryClient.getQueryData<{ id: string } | null>(["perfil-basico", user!.id])?.id;
+      if (!profileId) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("id")
+          .eq("user_id", user!.id)
+          .maybeSingle();
+        if (!profile) return { ...vazio, semPerfil: true };
+        profileId = profile.id as string;
+      }
 
       const { data: plan } = await supabase
         .from("workout_plans")
         .select("id")
-        .eq("profile_id", profile.id)
+        .eq("profile_id", profileId)
         .eq("ativo", true)
         .maybeSingle();
       if (!plan) return vazio;
 
+      // dias e "dia atual" em paralelo (antes eram uma consulta depois da outra)
+      const atualPromise = supabase.rpc("get_current_workout_day", { p_plan_id: plan.id });
       const { data: dias, error } = await supabase
         .from("workout_days")
         .select(
@@ -156,9 +163,7 @@ function TreinoPage() {
         .order("ordem");
       if (error) throw error;
 
-      const { data: atualId } = await supabase.rpc("get_current_workout_day", {
-        p_plan_id: plan.id,
-      });
+      const { data: atualId } = await atualPromise;
 
       const normalizados = ((dias ?? []) as unknown as WorkoutDay[]).map((d) => ({
         ...d,

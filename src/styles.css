@@ -206,21 +206,34 @@
 }
 
 @utility screen-in {
-  animation: screen-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: screen-in 0.2s ease-out backwards;
+}
+
+@utility page-in {
+  animation: page-in 0.14s ease-out backwards;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @utility rise-in {
-  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: rise-in 0.24s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 @utility swipe-next {
-  animation: swipe-next 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: swipe-next 0.2s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 @keyframes swipe-next {
   from {
     opacity: 0;
-    transform: translateX(38px);
+    transform: translateX(22px);
   }
   to {
     opacity: 1;
@@ -232,7 +245,7 @@
 @keyframes screen-in {
   from {
     opacity: 0;
-    transform: translateY(14px) scale(0.995);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -243,7 +256,7 @@
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(22px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -403,5 +416,63 @@ button[role="combobox"]:focus-visible {
   .surface-iron,
   .bg-card {
     background-color: var(--glass-strong);
+  }
+}
+
+/* ---------- Fluidez no celular ----------
+   Desfoque de vidro sob um fundo animado é caro: no toque, os cartões ficam translúcidos
+   sem desfoque (mesmo visual, bem mais leve) e o fundo anima menos. */
+html {
+  -webkit-tap-highlight-color: transparent;
+  text-size-adjust: 100%;
+}
+button,
+a,
+[role="button"],
+[role="tab"],
+label,
+input,
+select,
+textarea {
+  touch-action: manipulation; /* tira o atraso do toque e o zoom por duplo toque */
+}
+.fx-ambient,
+.fx-curves {
+  contain: strict;
+  transform: translateZ(0);
+}
+@media (max-width: 820px), (pointer: coarse) {
+  .surface-iron,
+  .bg-card {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: color-mix(in srgb, var(--background) 48%, transparent);
+  }
+  .glass-bar {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  [role="dialog"].bg-card,
+  [role="alertdialog"].bg-card,
+  [role="dialog"].bg-background,
+  [role="alertdialog"].bg-background,
+  .bg-popover {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    background-color: color-mix(in srgb, var(--background) 92%, transparent);
+  }
+  .fx-curves .fx-w {
+    display: none;
+  }
+  .fx-curves .fx-pl:nth-of-type(n + 6) {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen-in,
+  .page-in,
+  .rise-in,
+  .swipe-next {
+    animation: none;
   }
 }

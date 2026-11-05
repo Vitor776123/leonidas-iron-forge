@@ -35,6 +35,7 @@ export function AppShell({
               src={logoUrl ?? helmetAsset.url}
               alt={nomeMarca ?? "Leonidas"}
               className="size-9 shrink-0 object-contain"
+              decoding="async"
             />
             <span className="truncate font-display text-xl uppercase tracking-[0.2em]">
               {nome || nomeMarca || "LEONIDAS"}
@@ -50,7 +51,7 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="screen-in mx-auto w-full max-w-2xl px-4 pb-44 pt-3">{children}</main>
+      <main className="page-in mx-auto w-full max-w-2xl px-4 pb-44 pt-3">{children}</main>
 
       <div className="fixed inset-x-0 bottom-0 z-50 px-3">
         {bottomBar}

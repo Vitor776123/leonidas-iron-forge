@@ -22,6 +22,13 @@ const CURVES: { d: string; dur: number; off: number }[] = [
 // tamanho do rastro de cada camada (em % da curva)
 const TRAIL = { w: 16, m: 10, c: 5 } as const;
 const FRAME_MS = 1000 / 20 - 2; // ~20 quadros/s: o movimento é lento e poupa bateria
+const FRAME_MS_TOQUE = 1000 / 12 - 2; // celular: 12 quadros/s bastam para um movimento lento
+
+/** Aparelhos com poucos núcleos/memória ficam com o fundo parado (só o brilho e as curvas estáticas). */
+function aparelhoFraco() {
+  const n = navigator as Navigator & { deviceMemory?: number };
+  return (n.hardwareConcurrency ?? 8) <= 4 || (n.deviceMemory ?? 8) <= 3;
+}
 
 export function FundoAnimado() {
   const svgRef = useRef<SVGSVGElement>(null);
@@ -30,17 +37,18 @@ export function FundoAnimado() {
     const svg = svgRef.current;
     if (!svg) return undefined;
     const mqReduce = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const mqSmall = window.matchMedia("(max-width: 820px)");
+    const mqSmall = window.matchMedia("(max-width: 820px), (pointer: coarse)");
+    const fraco = aparelhoFraco();
     const grupos = Array.from(svg.querySelectorAll<SVGGElement>(".fx-pl"));
     let raf = 0;
     let last = 0;
 
     const tick = (t: number) => {
       raf = requestAnimationFrame(tick);
-      if (t - last < FRAME_MS) return;
+      if (t - last < (mqSmall.matches ? FRAME_MS_TOQUE : FRAME_MS)) return;
       last = t;
       const s = t / 1000;
-      const max = mqSmall.matches ? 5 : grupos.length;
+      const max = mqSmall.matches ? 4 : grupos.length;
       for (let i = 0; i < max; i++) {
         const g = grupos[i];
         if (!g) continue;
@@ -57,7 +65,7 @@ export function FundoAnimado() {
     };
 
     const sync = () => {
-      const rodar = !mqReduce.matches && !document.hidden;
+      const rodar = !mqReduce.matches && !fraco && !document.hidden;
       if (rodar && !raf) raf = requestAnimationFrame(tick);
       else if (!rodar && raf) {
         cancelAnimationFrame(raf);
