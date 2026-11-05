@@ -93,9 +93,9 @@ function AuthPage() {
           <div className="surface-iron space-y-4 rounded-sm border border-border p-6 text-center">
             <h2 className="font-display text-3xl tracking-wide">Quase lá!</h2>
             <p className="text-sm text-muted-foreground">
-              Enviamos um link de confirmação para{" "}
-              <span className="text-gold">{aguardando}</span>. Abra o e-mail e toque no link para
-              ativar sua conta. Se não encontrar, olhe a caixa de spam.
+              Enviamos um link de confirmação para <span className="text-gold">{aguardando}</span>.
+              Abra o e-mail e toque no link para ativar sua conta. Se não encontrar, olhe a caixa de
+              spam.
             </p>
             <ReenviarBotao email={aguardando} iniciarEspera />
             <Button
@@ -109,51 +109,51 @@ function AuthPage() {
             </Button>
           </div>
         ) : (
-        <form
-          onSubmit={submit}
-          className="surface-iron space-y-5 rounded-sm border border-border p-6"
-        >
-          <div className="space-y-2">
-            <Label htmlFor="email">E-mail</Label>
-            <Input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="h-12 text-base"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="senha">Senha</Label>
-            <Input
-              id="senha"
-              type="password"
-              required
-              minLength={6}
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              className="h-12 text-base"
-            />
-          </div>
-          <Button
-            type="submit"
-            disabled={busy}
-            className="h-12 w-full font-display text-lg tracking-widest"
+          <form
+            onSubmit={submit}
+            className="surface-iron space-y-5 rounded-sm border border-border p-6"
           >
-            {busy ? "..." : mode === "login" ? "ENTRAR" : "CRIAR CONTA"}
-          </Button>
-          <button
-            type="button"
-            onClick={() => setMode(mode === "login" ? "signup" : "login")}
-            className="w-full text-center text-sm text-muted-foreground transition-colors hover:text-gold"
-          >
-            {mode === "login" ? "Criar uma conta" : "Já tenho conta"}
-          </button>
-          {naoConfirmado && mode === "login" && (
-            <ReenviarBotao email={email} label="Reenviar e-mail de confirmação" />
-          )}
-        </form>
+            <div className="space-y-2">
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-12 text-base"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="senha">Senha</Label>
+              <Input
+                id="senha"
+                type="password"
+                required
+                minLength={6}
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                className="h-12 text-base"
+              />
+            </div>
+            <Button
+              type="submit"
+              disabled={busy}
+              className="h-12 w-full font-display text-lg tracking-widest"
+            >
+              {busy ? "..." : mode === "login" ? "ENTRAR" : "CRIAR CONTA"}
+            </Button>
+            <button
+              type="button"
+              onClick={() => setMode(mode === "login" ? "signup" : "login")}
+              className="w-full text-center text-sm text-muted-foreground transition-colors hover:text-gold"
+            >
+              {mode === "login" ? "Criar uma conta" : "Já tenho conta"}
+            </button>
+            {naoConfirmado && mode === "login" && (
+              <ReenviarBotao email={email} label="Reenviar e-mail de confirmação" />
+            )}
+          </form>
         )}
       </div>
     </div>

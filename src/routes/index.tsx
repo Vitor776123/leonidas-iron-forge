@@ -74,19 +74,22 @@ function Index() {
       .select("id, idade, altura_cm, peso_kg, objetivo")
       .eq("user_id", user.id)
       .maybeSingle()
-      .then(({ data, error }) => {
-        // Em caso de erro de leitura, nunca reabrir o onboarding.
-        const alvo = error
-          ? "/treino"
-          : !data || !perfilEstaCompleto(data as Record<string, unknown>)
-            ? "/questionario"
-            : "/treino";
-        if (retorno === "sucesso") setDestino(alvo);
-        else navigate({ to: alvo, replace: true });
-      }, () => {
-        if (retorno === "sucesso") setDestino("/questionario");
-        else setFalhou(true);
-      });
+      .then(
+        ({ data, error }) => {
+          // Em caso de erro de leitura, nunca reabrir o onboarding.
+          const alvo = error
+            ? "/treino"
+            : !data || !perfilEstaCompleto(data as Record<string, unknown>)
+              ? "/questionario"
+              : "/treino";
+          if (retorno === "sucesso") setDestino(alvo);
+          else navigate({ to: alvo, replace: true });
+        },
+        () => {
+          if (retorno === "sucesso") setDestino("/questionario");
+          else setFalhou(true);
+        },
+      );
   }, [user, loading, navigate, retorno, falhou]);
 
   if (falhou) return <TelaErro />;
