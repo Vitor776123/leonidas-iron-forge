@@ -45,27 +45,27 @@
 }
 
 :root {
-  --radius: 0.25rem;
+  --radius: 0.875rem;
   --background: oklch(0.13 0.004 60);
   --foreground: oklch(0.95 0.005 80);
-  --card: oklch(0.18 0.005 60);
+  --card: color-mix(in srgb, var(--background) 42%, transparent);
   --card-foreground: oklch(0.95 0.005 80);
-  --popover: oklch(0.16 0.005 60);
+  --popover: color-mix(in srgb, var(--background) 90%, transparent);
   --popover-foreground: oklch(0.95 0.005 80);
   --primary: oklch(0.55 0.22 27);
   --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.24 0.006 60);
+  --secondary: rgba(var(--fx-rgb), 0.08);
   --secondary-foreground: oklch(0.95 0.005 80);
-  --muted: oklch(0.22 0.005 60);
+  --muted: rgba(var(--fx-rgb), 0.07);
   --muted-foreground: oklch(0.68 0.01 80);
-  --accent: oklch(0.28 0.01 60);
+  --accent: rgba(var(--fx-rgb), 0.16);
   --accent-foreground: oklch(0.95 0.005 80);
   --gold: oklch(0.79 0.14 85);
   --gold-foreground: oklch(0.16 0.01 60);
   --destructive: oklch(0.58 0.23 25);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.3 0.008 60);
-  --input: oklch(0.26 0.008 60);
+  --border: rgba(var(--fx-rgb), 0.22);
+  --input: rgba(var(--fx-rgb), 0.20);
   --ring: oklch(0.55 0.22 27);
   --sidebar: oklch(0.16 0.005 60);
   --sidebar-foreground: oklch(0.95 0.005 80);
@@ -206,15 +206,15 @@
 }
 
 @utility screen-in {
-  animation: screen-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: screen-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 @utility rise-in {
-  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rise-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 @utility swipe-next {
-  animation: swipe-next 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: swipe-next 0.28s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 @keyframes swipe-next {
@@ -248,5 +248,160 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* ---------- Vidro (estilo Pandora) ----------
+   Superfícies translúcidas com desfoque, borda luminosa e brilho no hover.
+   Tudo deriva de --fx-rgb (cor da academia) e de --background. */
+:root {
+  --fx-hl: color-mix(in srgb, rgb(var(--fx-rgb)) 35%, white);
+  --glass-blur: blur(16px) saturate(1.35);
+  --glass-card: linear-gradient(
+    150deg,
+    rgba(var(--fx-rgb), 0.13) 0%,
+    rgba(0, 0, 0, 0.3) 55%,
+    rgba(var(--fx-rgb), 0.05) 100%
+  );
+  --glass-card-hi: linear-gradient(
+    150deg,
+    rgba(var(--fx-rgb), 0.22) 0%,
+    rgba(0, 0, 0, 0.34) 55%,
+    rgba(var(--fx-rgb), 0.1) 100%
+  );
+  --glass-strong: color-mix(in srgb, var(--background) 86%, transparent);
+  --glass-edge: inset 0 1px 0 color-mix(in srgb, var(--fx-hl) 14%, transparent);
+  --card-glow:
+    var(--glass-edge), 0 0 34px rgba(var(--fx-rgb), 0.07), 0 22px 50px rgba(0, 0, 0, 0.38);
+  --card-glow-hover:
+    var(--glass-edge), 0 0 44px rgba(var(--fx-rgb), 0.16), 0 22px 50px rgba(0, 0, 0, 0.4);
+}
+
+.surface-iron,
+.bg-card {
+  background-image: var(--glass-card);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.surface-iron {
+  box-shadow: var(--card-glow);
+  transition:
+    box-shadow 0.25s,
+    border-color 0.2s,
+    background-image 0.2s,
+    transform 0.15s;
+}
+/* o que é clicável clareia e brilha de leve no hover: mostra o que dá para selecionar */
+button.surface-iron:not(:disabled):hover,
+a.surface-iron:hover,
+[role="button"].surface-iron:hover {
+  background-image: var(--glass-card-hi);
+  box-shadow: var(--card-glow-hover);
+  border-color: rgba(var(--fx-rgb), 0.5);
+}
+button.surface-iron:not(:disabled):active,
+a.surface-iron:active {
+  transform: translateY(1px);
+}
+
+/* diálogos, menus e gavetas: vidro mais firme para manter a leitura */
+[role="dialog"].bg-card,
+[role="alertdialog"].bg-card,
+[role="dialog"].bg-background,
+[role="alertdialog"].bg-background,
+.bg-popover {
+  background-color: var(--glass-strong);
+  background-image: linear-gradient(150deg, rgba(var(--fx-rgb), 0.1), transparent 60%);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-color: rgba(var(--fx-rgb), 0.28);
+  box-shadow: var(--glass-edge), 0 24px 64px rgba(0, 0, 0, 0.55), 0 0 40px rgba(var(--fx-rgb), 0.1);
+}
+
+/* campos */
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+button[role="combobox"] {
+  background-color: color-mix(in srgb, var(--background) 55%, transparent);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+input:not([type="checkbox"]):not([type="radio"]):hover,
+textarea:hover,
+button[role="combobox"]:hover {
+  border-color: rgba(var(--fx-rgb), 0.4);
+}
+input:not([type="checkbox"]):not([type="radio"]):focus-visible,
+textarea:focus-visible,
+button[role="combobox"]:focus-visible {
+  border-color: rgba(var(--fx-rgb), 0.75);
+  box-shadow:
+    0 0 0 3px rgba(var(--fx-rgb), 0.14),
+    0 0 18px rgba(var(--fx-rgb), 0.12);
+}
+
+/* botões */
+.btn-fx-primary {
+  background-image: linear-gradient(135deg, color-mix(in srgb, var(--primary) 78%, white), var(--primary));
+  box-shadow:
+    0 0 22px color-mix(in srgb, var(--primary) 38%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.btn-fx-primary:hover:not(:disabled) {
+  filter: brightness(1.12);
+  box-shadow:
+    0 0 30px color-mix(in srgb, var(--primary) 58%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.btn-fx-glass {
+  border: 1px solid rgba(var(--fx-rgb), 0.26);
+  background-color: rgba(var(--fx-rgb), 0.06);
+}
+.btn-fx-glass:hover:not(:disabled) {
+  background-color: rgba(var(--fx-rgb), 0.14);
+  border-color: rgba(var(--fx-rgb), 0.55);
+  box-shadow: 0 0 18px rgba(var(--fx-rgb), 0.14);
+}
+
+/* barras flutuantes (sem faixa preta): topo esmaece, rodapé é uma pílula de vidro */
+.top-fade {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--background) 88%, transparent), transparent);
+}
+.bottom-fade {
+  background: linear-gradient(0deg, color-mix(in srgb, var(--background) 88%, transparent), transparent);
+}
+.glass-bar {
+  background: linear-gradient(
+    170deg,
+    color-mix(in srgb, var(--background) 62%, transparent),
+    color-mix(in srgb, var(--background) 72%, transparent)
+  );
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(var(--fx-rgb), 0.24);
+  box-shadow: var(--card-glow);
+}
+.tab-fx {
+  border-radius: 1.1rem;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    box-shadow 0.2s;
+}
+.tab-fx:hover {
+  background-color: rgba(var(--fx-rgb), 0.1);
+}
+.tab-fx[aria-current="page"] {
+  background-image: linear-gradient(135deg, rgba(var(--fx-rgb), 0.26), rgba(var(--fx-rgb), 0.1));
+  box-shadow:
+    inset 0 0 0 1px rgba(var(--fx-rgb), 0.5),
+    0 0 22px rgba(var(--fx-rgb), 0.22);
+}
+
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .surface-iron,
+  .bg-card {
+    background-color: var(--glass-strong);
   }
 }

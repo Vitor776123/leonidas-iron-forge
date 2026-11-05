@@ -27,7 +27,7 @@ export function AppShell({
 
   return (
     <div className="min-h-screen">
-      <header className="sticky top-0 z-40 border-b border-border/80 bg-background/90 backdrop-blur">
+      <header className="top-fade sticky top-0 z-40">
         <div className="mx-auto grid max-w-2xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-1 px-4 py-2">
           {headerLeft ?? <span />}
           <Link to="/treino" className="flex min-w-0 items-center gap-2">
@@ -50,12 +50,14 @@ export function AppShell({
         </div>
       </header>
 
-      <main className="screen-in mx-auto w-full max-w-2xl px-4 pb-40 pt-5">{children}</main>
+      <main className="screen-in mx-auto w-full max-w-2xl px-4 pb-44 pt-3">{children}</main>
 
-      <div className="fixed inset-x-0 bottom-0 z-50">
+      <div className="fixed inset-x-0 bottom-0 z-50 px-3">
         {bottomBar}
-        <nav className="border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur">
-          <div className={`mx-auto grid max-w-2xl ${ehGestor ? "grid-cols-4" : "grid-cols-3"}`}>
+        <nav className="mb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <div
+            className={`glass-bar mx-auto grid max-w-2xl gap-1 rounded-3xl p-1.5 ${ehGestor ? "grid-cols-4" : "grid-cols-3"}`}
+          >
             <TabLink to="/treino" icon={<Dumbbell className="size-6" />} label="Treino" />
             <TabLink to="/progresso" icon={<TrendingUp className="size-6" />} label="Progresso" />
             {ehGestor && (
@@ -86,8 +88,8 @@ function TabLink({
     <Link
       to={to}
       activeProps={{ className: "text-primary" }}
-      inactiveProps={{ className: "text-muted-foreground" }}
-      className="flex min-h-[60px] flex-col items-center justify-center gap-1 font-display text-xs uppercase tracking-[0.2em] transition-colors active:bg-secondary/60"
+      inactiveProps={{ className: "text-muted-foreground hover:text-foreground" }}
+      className="tab-fx flex min-h-[56px] flex-col items-center justify-center gap-1 font-display text-xs uppercase tracking-[0.2em] active:scale-[0.97]"
     >
       {icon}
       {label}

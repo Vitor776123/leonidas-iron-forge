@@ -1413,7 +1413,7 @@ function ExercisePicker({
           </section>
         </div>
 
-        <div className="border-t border-border bg-background p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+        <div className="bottom-fade p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
           <Button onClick={onClose} className="h-14 w-full font-display text-lg tracking-widest">
             CONCLUIR{adicionados ? ` (${adicionados})` : ""}
           </Button>
