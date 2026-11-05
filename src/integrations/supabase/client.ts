@@ -28,6 +28,7 @@ export type Profile = {
   foco: string;
   foco_grupo_customizado: string | null;
   imc: number | null;
+  equipamentos_preferidos: string[] | null;
 };
 
 export type Exercise = {

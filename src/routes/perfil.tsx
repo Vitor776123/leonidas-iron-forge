@@ -59,6 +59,19 @@ function PerfilPage() {
     },
   });
 
+  const { data: grupos } = useQuery({
+    queryKey: ["equipamento-grupos"],
+    queryFn: async () => {
+      const { data } = await supabase.from("equipamento_grupos").select("chave, rotulo");
+      return (data ?? []) as { chave: string; rotulo: string }[];
+    },
+  });
+  const equip = profile?.equipamentos_preferidos;
+  const equipTexto =
+    !equip || equip.length === 0
+      ? "Sem preferência"
+      : equip.map((k) => grupos?.find((g) => g.chave === k)?.rotulo ?? k).join(", ");
+
   const ultimo = resumo?.ultimo_treino;
 
   return (
@@ -85,6 +98,7 @@ function PerfilPage() {
             value={profile.foco_grupo_customizado || rotulo(profile.foco)}
             gold
           />
+          <Info label="Equipamento" value={equipTexto} />
         </div>
       )}
 
