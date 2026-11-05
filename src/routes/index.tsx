@@ -52,14 +52,13 @@ function Index() {
 
   useEffect(() => {
     retornoConsumido = true;
-    if (retorno) {
-      const t = setTimeout(limparUrl, 1500);
-      return () => clearTimeout(t);
-    }
+    if (!retorno) return undefined;
+    const t = setTimeout(limparUrl, 1500);
+    return () => clearTimeout(t);
   }, [retorno]);
 
   useEffect(() => {
-    if (falhou || loading) return;
+    if (falhou || loading) return undefined;
     if (!user) {
       if (retorno === "sucesso") {
         // sessão pode demorar; se não vier, mostra erro
@@ -67,7 +66,7 @@ function Index() {
         return () => clearTimeout(t);
       }
       navigate({ to: "/auth", replace: true });
-      return;
+      return undefined;
     }
     supabase
       .from("profiles")
@@ -90,6 +89,7 @@ function Index() {
           else setFalhou(true);
         },
       );
+    return undefined;
   }, [user, loading, navigate, retorno, falhou]);
 
   if (falhou) return <TelaErro />;
