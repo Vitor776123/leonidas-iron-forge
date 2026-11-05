@@ -1119,7 +1119,7 @@ const MUSCULOS: { value: string; label: string }[] = [
   { value: "quads", label: "Quadríceps" },
   { value: "traps", label: "Trapézio" },
   { value: "triceps", label: "Tríceps" },
-  { value: "upper back", label: "Costas sup." },
+  { value: "upper-back", label: "Costas sup." },
 ];
 
 function CriarDiaDialog({

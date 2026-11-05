@@ -67,7 +67,7 @@ const GRUPOS: Opt[] = [
   { label: "Quadríceps", value: "quads" },
   { label: "Trapézio", value: "traps" },
   { label: "Tríceps", value: "triceps" },
-  { label: "Parte superior das costas", value: "upper back" },
+  { label: "Parte superior das costas", value: "upper-back" },
 ];
 
 type Form = {
