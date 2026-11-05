@@ -1011,17 +1011,42 @@ function TrocaDialog({
 }) {
   const [busy, setBusy] = useState(false);
   const muscle = item?.exercises?.muscle;
+  const { user } = useAuth();
+
+  const { data: equipPermitidos, isFetched: equipOk } = useQuery({
+    queryKey: ["equip-permitidos", user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("equipamentos_preferidos")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      const chaves = (p?.equipamentos_preferidos as string[] | null) ?? null;
+      if (!chaves || chaves.length === 0) return null;
+      const { data: g } = await supabase
+        .from("equipamento_grupos")
+        .select("chave, equipamentos")
+        .in("chave", chaves);
+      const set = new Set<string>();
+      (g ?? []).forEach((r: { equipamentos: string[] | null }) =>
+        (r.equipamentos ?? []).forEach((e) => set.add(e)),
+      );
+      return set.size ? [...set] : null;
+    },
+  });
 
   const { data: alternativas, isLoading } = useQuery({
-    queryKey: ["alternativas", muscle, item?.exercise_id],
-    enabled: !!item && !!muscle,
+    queryKey: ["alternativas", muscle, item?.exercise_id, equipPermitidos],
+    enabled: !!item && !!muscle && (!user || equipOk),
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("exercises")
         .select("id, name_pt, muscle, body_part, equipment, gif_url, instructions_pt, dificuldade")
         .eq("muscle", muscle!)
-        .neq("id", item!.exercise_id)
-        .limit(40);
+        .neq("id", item!.exercise_id);
+      if (equipPermitidos) q = q.in("equipment", equipPermitidos);
+      const { data, error } = await q.limit(40);
       if (error) throw error;
       return (data ?? []) as Exercise[];
     },
