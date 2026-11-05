@@ -101,6 +101,75 @@
   color-scheme: dark;
 }
 
+/* ---------- Fundo dinâmico (FundoAnimado) ----------
+   --fx-rgb = cor das luzes (tripla R, G, B). O useMarca troca pelo tom da academia. */
+:root {
+  --fx-rgb: 212, 32, 42;
+}
+
+.fx-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(900px 620px at 6% -4%, rgba(var(--fx-rgb), 0.22), transparent 62%),
+    radial-gradient(820px 620px at 104% 104%, rgba(var(--fx-rgb), 0.17), transparent 62%),
+    radial-gradient(700px 520px at 62% 38%, rgba(var(--fx-rgb), 0.09), transparent 66%);
+}
+
+.fx-curves {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fx-curves path {
+  fill: none;
+  stroke-linecap: round;
+}
+.fx-curves .fx-base path {
+  stroke: rgb(var(--fx-rgb));
+  stroke-opacity: 0.07;
+  stroke-width: 1.2;
+}
+.fx-curves .fx-pl {
+  opacity: 0;
+}
+.fx-curves .fx-w {
+  stroke: rgb(var(--fx-rgb));
+  stroke-opacity: 0.1;
+  stroke-width: 12;
+  stroke-dasharray: 16 200;
+}
+.fx-curves .fx-m {
+  stroke: rgb(var(--fx-rgb));
+  stroke-opacity: 0.24;
+  stroke-width: 5;
+  stroke-dasharray: 10 200;
+}
+.fx-curves .fx-c {
+  stroke: color-mix(in srgb, rgb(var(--fx-rgb)) 45%, white);
+  stroke-opacity: 0.8;
+  stroke-width: 1.6;
+  stroke-dasharray: 5 200;
+}
+@media (max-width: 820px) {
+  /* o 1º <g> é a base estática; as luzes começam no 2º */
+  .fx-curves .fx-pl:nth-of-type(n + 7) {
+    display: none;
+  }
+}
+@media print {
+  .fx-ambient,
+  .fx-curves {
+    display: none !important;
+  }
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

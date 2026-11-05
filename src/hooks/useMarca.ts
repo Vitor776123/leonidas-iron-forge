@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePerfil } from "@/hooks/usePerfil";
+import { hexParaRgb, limitarLuminosidade, rgbParaHex } from "@/lib/cores";
 
 export type Marca = {
   id: string;
@@ -46,14 +47,26 @@ export function useMarca() {
       root.style.setProperty("--primary", primaria);
       root.style.setProperty("--ring", primaria);
       root.style.setProperty("--sidebar-primary", primaria);
+      // luzes do fundo animado: o tom da academia, sem ficar escuro demais para aparecer
+      const rgb = hexParaRgb(primaria);
+      if (rgb) {
+        const [r, g, b] = limitarLuminosidade(rgb, 0.4, 0.75);
+        root.style.setProperty("--fx-rgb", `${r}, ${g}, ${b}`);
+      }
     } else {
       root.style.removeProperty("--primary");
       root.style.removeProperty("--ring");
       root.style.removeProperty("--sidebar-primary");
+      root.style.removeProperty("--fx-rgb");
     }
 
     if (secundaria && HEX.test(secundaria)) {
-      root.style.setProperty("--background", secundaria);
+      // o tema é escuro: uma cor de fundo clara é escurecida (mantém o matiz) para o brilho funcionar
+      const rgb = hexParaRgb(secundaria);
+      root.style.setProperty(
+        "--background",
+        rgb ? rgbParaHex(limitarLuminosidade(rgb, 0, 0.1)) : secundaria,
+      );
     } else {
       root.style.removeProperty("--background");
     }
